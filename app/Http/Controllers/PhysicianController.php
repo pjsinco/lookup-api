@@ -248,7 +248,7 @@ class PhysicianController extends Controller
             'zip' => $request->zip ? $request->zip : null,
             'specialty' => !empty($specialty) ? $specialty->full : null,
             'q' => $request->q,
-            'count' => count($physicians),
+            'count' => ($physicians ? count($physicians) : 0),
             'radius' => $searchDistance
         ];
 
@@ -286,7 +286,7 @@ class PhysicianController extends Controller
         
         if ($physician) {
             return $this->response
-                ->withItem($phys, new PhysicianTransformer);
+                ->withItem($physician, new PhysicianTransformer);
         }
 
         $errorMeta = [

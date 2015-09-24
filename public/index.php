@@ -1,5 +1,8 @@
 <?php
 
+// TODO fix in production
+header("Access-Control-Allow-Origin: http://localhost:3333");
+
 /**
  * Laravel - A PHP Framework For Web Artisans
  *

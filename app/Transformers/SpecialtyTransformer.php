@@ -36,4 +36,5 @@ class SpecialtyTransformer extends TransformerAbstract
             'name' => $specialty['full'],
         ];
 
+    }
 }
