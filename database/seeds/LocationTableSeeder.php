@@ -52,3 +52,4 @@ class LocationTableSeeder extends Seeder
         return $csv->query();
     }
 }
+

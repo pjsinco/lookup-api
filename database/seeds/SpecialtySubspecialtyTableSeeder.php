@@ -56,3 +56,4 @@ class SpecialtySubspecialtyTableSeeder extends Seeder
         return $csv->query();
     }
 }
+

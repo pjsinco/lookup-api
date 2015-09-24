@@ -77,3 +77,4 @@ class PhysicianTableSeeder extends Seeder
         return $csv->query();
     }
 }
+
