@@ -1,6 +1,10 @@
 <?php
 
-//Route::get('try-this-one', 'LocationController@tryThisOne');
+Route::get('/', function() {
+
+    echo '...';
+
+});
 
 Route::group(['prefix' => 'api/v1'], function() {
 
