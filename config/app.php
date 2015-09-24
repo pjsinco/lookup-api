@@ -138,6 +138,8 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
         Cyvelnet\Laravel5Fractal\Laravel5FractalServiceProvider::class,
+        EllipseSynergie\ApiResponse\Laravel\ResponseServiceProvider::class, 
+
 
         /*
          * Application Service Providers...
