@@ -66,6 +66,7 @@ class PhysicianTableSeeder extends Seeder
                 'geo_confidence'             => $row[36],
                 'geo_city'                   => $row[37],
                 'geo_state'                  => $row[38],
+                'geo_matches'                => $row[39],
             ]);
         }
     }
