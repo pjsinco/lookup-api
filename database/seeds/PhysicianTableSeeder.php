@@ -55,8 +55,17 @@ class PhysicianTableSeeder extends Seeder
                 'Phone'                      => $row[25],
                 'Email'                      => $row[26],
                 'ABMS'                       => ($row[27] == 'YES' ? 1 : 0),
-                'lat'                        => $row[28],
-                'lon'                        => $row[29],
+                'Gender'                     => $row[28],
+                'CERT1'                      => $row[29],
+                'CERT2'                      => $row[30],
+                'CERT3'                      => $row[31],
+                'CERT4'                      => $row[32],
+                'CERT5'                      => $row[33],
+                'lat'                        => $row[34],
+                'lon'                        => $row[35],
+                'geo_confidence'             => $row[36],
+                'geo_city'                   => $row[37],
+                'geo_state'                  => $row[38],
             ]);
         }
     }
