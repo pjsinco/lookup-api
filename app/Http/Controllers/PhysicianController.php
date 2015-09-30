@@ -185,6 +185,7 @@ class PhysicianController extends Controller
 
         // if we don't have a requested distance, we'll cycle through
         // our fallback distances until we get at least 1 result;
+        // if we don't have anything by our max distance, we'll return 0.
         if (!$request->has('distance')) {
 
             while (empty($physicians)) {

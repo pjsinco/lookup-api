@@ -26,7 +26,7 @@ class PhysicianTableSeeder extends Seeder
     private function seedTable($data)
     {
         foreach ($data as $lineIndex => $row) {
-            $specialty = App\Physician::create([
+            $physician = App\Physician::create([
                 'aoa_mem_id'                 => $row[0],
                 'full_name'                  => $row[1],
                 'prefix'                     => $row[2],
@@ -66,7 +66,7 @@ class PhysicianTableSeeder extends Seeder
                 'geo_confidence'             => $row[36],
                 'geo_city'                   => $row[37],
                 'geo_state'                  => $row[38],
-                'geo_matches'                => $row[39],
+                'geo_matches'                => ($row[39] == 'True' ? 1 : 0),
             ]);
         }
     }
