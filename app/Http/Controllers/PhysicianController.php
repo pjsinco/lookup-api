@@ -65,13 +65,112 @@ class PhysicianController extends Controller
     private function getSpecialty($query)
     {
         $query = trim(strtolower($query));
-        $specialty = Specialty::where('full', 'like', $query)->get()->first();
+        $specialty = Specialty::where('full', 'like', '%' . $query . '%')->get()->all();
+
+        // figure out its parent
+        if (count($specialty) > 1) {
+            
+        } 
+
 
         if (!empty($specialty)) {
             return $specialty;
         } 
+        return false;
+    }
+
+    /**
+     * Find the parent specialty for any specialty.
+     *
+     * @param Specialty 
+     * @return string array - the parent specialties
+     */
+    private function getParentSpecialties(Specialty $specialty)
+    {
+        //select specialty_id from specialty_subspecialty where subspecialty_id = 'FOM';
+        $parentSpecialties = DB::table('specialty_subspecialty')
+            ->where('subspecialty_id', '=', $specialty->code)
+            ->get();
+
+        if ($parentSpecialties) {
+            return array_map(function($item) {
+                return $item->specialty_id;
+            }, $parentSpecialties);
+        }
 
         return false;
+    }
+
+    /**
+     * Get all subspecialties for a parent specialty.
+     *
+     * @param Specialty $specialty - the parent specialty
+     * @return string - comma-delimited, wrapped in parentheses
+     *    ex.: ('HNS','OOP','OTA','OTL','OTR','PDO','RHI')
+     */
+    private function getSubspecialties(Specialty $specialty, $string = true)
+    {
+        // Make sure we're working with a parent specialty
+        $subs = DB::table('specialty_subspecialty')
+            ->addSelect('subspecialty_id')
+            ->where('specialty_id', '=', $specialty->code)
+            ->get();
+        
+        $subsArray = array_map(function($item) {
+            return $item->subspecialty_id;
+        }, $subs);
+
+        return $subsArray;
+    }
+
+    /**
+     * Find physicians who practice any of the subspecialties of the 
+     * parent specialty.
+     *
+     * @param Request request
+     * @param Specialty specialty - the parent specialty
+     * @param string distance
+     */
+    private function searchWithParentSpecialty(Request $request,
+        Specialty $specialty, $distance
+    )
+    {
+        $subspecialties = $this->getSubspecialties($specialty);
+        $searchDistance = $request->distance ? $request->distance : $distance;
+        $haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
+
+        $physicians = Physician::select(DB::raw($haversineSelectStmt))
+            ->whereIn('PrimaryPracticeFocusCode', $subspecialties )
+            ->having('distance', '<', $searchDistance)
+            ->orderBy('distance', 'asc')
+            ->get();
+
+        // Instead of returning an empty Collection, let's return false
+        return $physicians;
+
+    }
+
+    /**
+     * Find physicians who practice one specific specialty.
+     *
+     * @param Request request
+     * @param Specialty specialty - the parent specialty
+     * @param string distance
+     */
+    private function searchWithSubspecialty(Request $request,
+        Specialty $specialty, $distance
+    )
+    {
+        $searchDistance = $request->distance ? $request->distance : $distance;
+        $haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
+
+        $physicians = Physician::select(DB::raw($haversineSelectStmt))
+            ->where('PrimaryPracticeFocusCode', '=', $specialty->code )
+            ->having('distance', '<', $searchDistance)
+            ->orderBy('distance', 'asc')
+            ->get();
+
+        return $physicians;
     }
 
     /**
@@ -85,40 +184,36 @@ class PhysicianController extends Controller
     private function searchWithSpecialty(Request $request, 
         Specialty $specialty, $distance)
     {
-        $searchDistance = $request->distance ? $request->distance : $distance;
-        $haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
-
-        $physicians = Physician::select(DB::raw($haversineSelectStmt))
-            ->where('PrimaryPracticeFocusCode', '=', $specialty->code )
-            ->having('distance', '<', $searchDistance)
-            ->orderBy('distance', 'asc')
-            ->get();
-
-        // Instead of returning an empty Collection, let's return false
-        return $physicians->isEmpty() ? false : $physicians;
+        if ($this->isParentSpecialty($specialty)) {
+            $physicians = $this->searchWithParentSpecialty($request, $specialty, $distance);
+        } else {
+            $physicians = $this->searchWithSubspecialty($request, $specialty, $distance);
+        }
+    
+        return $physicians;
     }
 
     /**
-     * Search for physicians by first or last name.
+     * Search for physicians by first name, last name or specialty
      * 
      * @param Request $request
      * @param int $distance
      * @return Array
      */
-    private function searchWithName(Request $request, $distance)
+    private function searchWithQuery(Request $request, $distance)
     {
-        $searchDistance = $request->distance ? $request->distance : $distance;
+        //$searchDistance = $request->distance ? $request->distance : $distance;
         $haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
 
         $physicians = Physician::select(DB::raw($haversineSelectStmt))
             ->where('last_name', 'like', $request->q . '%' )
             ->orWhere('first_name', 'like', $request->q . '%' )
-            ->having('distance', '<', $searchDistance)
+            ->orWhere('PrimaryPracticeFocusArea', 'like', '%' . $request->q . '%' )
+            ->having('distance', '<', $distance)
             ->orderBy('distance', 'asc')
             ->get();
 
-        // Instead of returning an empty Collection, let's return false
-        return $physicians->isEmpty() ? false : $physicians;
+        return $physicians;
     }
 
     /**
@@ -175,20 +270,26 @@ class PhysicianController extends Controller
     {
         $searchDistance = $request->distance ? $request->distance : 0;
 
-        if ($request->q != '') {
-            $specialty = $this->getSpecialty($request->q);
-        } else {
-            $specialty = null;
-        }
-
         $physicians = null;
+        $specialty = null;
+        $query = null;
+
+        if ($request->has('code')) {
+
+            $specialty = Specialty::where('code', '=', $request->code)->first();
+
+        } elseif ($request->has('q') && !$request->has('code')) {
+
+            //$physicians = $this->searchWithSpecialty
+
+            $query = $request->q;
+        }
 
         // if we don't have a requested distance, we'll cycle through
         // our fallback distances until we get at least 1 result;
         // if we don't have anything by our max distance, we'll return 0.
         if (!$request->has('distance')) {
-
-            while (empty($physicians)) {
+            while (empty($physicians) || $physicians->isEmpty()) {
                 $searchDistance = $this->getNextDistance($searchDistance);
 
                 if ($specialty) {
@@ -197,15 +298,13 @@ class PhysicianController extends Controller
                         $specialty, 
                         $searchDistance
                     );
-                } else if ($request->q != '' && !$specialty) {
-                    $physicians = $this->searchWithName(
-                        $request, 
-                        $searchDistance
-                    );
+                } elseif ($query) {
+                    $physicians = $this->searchWithQuery($request, $searchDistance);
                 } else {
                     $haversineSelectStmt = 
                         $this->haversineSelect($request->lat, $request->lon);
 
+                    // General search
                     $physicians = Physician::select(DB::raw($haversineSelectStmt))
                         ->where('last_name', 'like', $request->name . '%')
                         ->orWhere('first_name', 'like', $request->name . '%')
@@ -226,13 +325,14 @@ class PhysicianController extends Controller
                         $specialty, 
                         $request->distance
                 );
-            } else if ($request->q != '') {
+            } elseif ($query) {
                 $physicians = 
-                    $this->searchWithName($request, $request->distance);
+                    $this->searchWithQuery($request, $request->distance);
             } else {
                 $haversineSelectStmt = 
                     $this->haversineSelect($request->lat, $request->lon);
 
+                // General search, with distance
                 $physicians = Physician::select(DB::raw($haversineSelectStmt))
                     ->where('last_name', 'like', $request->name . '%')
                     ->orWhere('first_name', 'like', $request->name . '%')
@@ -309,6 +409,21 @@ class PhysicianController extends Controller
         //return $this->respond([
             //'data' => $this->physicianTransformer->transform($physician)
         //]);
+    }
+
+    /**
+     * Determine whether a specialty is a parent specialty or a subspecialty.
+     *
+     * @param Specialty
+     * @return boolean
+     */
+    private function isParentSpecialty(Specialty $specialty)
+    {
+        $result = DB::table('specialty_subspecialty')
+            ->where('specialty_id', '=', $specialty->code)
+            ->get();
+        
+        return !empty($result);
     }
 
 }
