@@ -266,6 +266,54 @@ class PhysicianController extends Controller
         return $haversineSelect;
     }
 
+    /**
+     * Fuzzy search for a physician by the beginning of first name or last name
+     *
+     * @param Request - the request
+     * @return json
+     */
+    public function nameSearch(Request $request)
+    {
+
+        $haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
+        $physicians = Physician::select(DB::raw($haversineSelectStmt))
+            ->where('last_name', 'like', $request->name . '%')
+            ->orWhere('first_name', 'like', $request->name . '%')
+            ->having('distance', '<', $this->defaultDistance)
+            ->get();
+
+        $meta = [
+            'city' => $request->city,
+            'state' => $request->state,
+            'zip' => $request->zip ? $request->zip : null,
+            'specialty' => !empty($specialty) ? $specialty->full : null,
+            'q' => $request->q,
+            'count' => ($physicians ? count($physicians) : 0),
+            'radius' => $this->defaultDistance
+        ];
+
+        if (!empty($physicians)) {
+            return $this->response->withCollection(
+                $physicians, 
+                new PhysicianTransformer,
+                null,
+                null,
+                $meta
+            );
+        } 
+    
+        $errorMeta = [
+            'meta' => $meta, 
+            'error' => [
+                'code' => 'GEN-NOT-FOUND',
+                'http_code' => 404,
+                'message' => 'Physician not found'
+            ]
+        ]; 
+        return $this->response->withArray($errorMeta);
+
+    }
+
     public function search(Request $request)
     {
         $searchDistance = $request->distance ? $request->distance : 0;
