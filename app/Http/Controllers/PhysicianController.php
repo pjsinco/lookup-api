@@ -208,7 +208,7 @@ class PhysicianController extends Controller
         $physicians = Physician::select(DB::raw($haversineSelectStmt))
             ->where('last_name', 'like', $request->q . '%' )
             ->orWhere('first_name', 'like', $request->q . '%' )
-            ->orWhere('PrimaryPracticeFocusArea', 'like', '%' . $request->q . '%' )
+            ->orWhere('PrimaryPracticeFocusArea', 'like', $request->q . '%' )
             ->having('distance', '<', $distance)
             ->orderBy('distance', 'asc')
             ->get();
