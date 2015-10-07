@@ -283,7 +283,7 @@ class PhysicianController extends Controller
             ->get();
 
         $meta = [
-            'city' => $request->city,
+            'city' => urldecode($request->city),
             'state' => $request->state,
             'zip' => $request->zip ? $request->zip : null,
             'specialty' => !empty($specialty) ? $specialty->full : null,
@@ -392,7 +392,7 @@ class PhysicianController extends Controller
         }
 
         $meta = [
-            'city' => $request->city,
+            'city' => urldecode($request->city),
             'state' => $request->state,
             'zip' => $request->zip ? $request->zip : null,
             'specialty' => !empty($specialty) ? $specialty->full : null,

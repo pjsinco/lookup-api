@@ -50,7 +50,7 @@ class PhysicianTransformer extends TransformerAbstract
             'state' => $phys['State_Province'],
             'zip' => $phys['Zip'],
             'phone' => $phys['Phone'],
-            'email' => $phys['Email'],
+            //'email' => $phys['Email'],
             'website' => $phys['website'],
             'school' => $phys['COLLEGE_CODE'],
             'grad_year' => $phys['YearOfGraduation'],
