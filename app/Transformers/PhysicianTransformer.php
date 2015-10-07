@@ -87,22 +87,27 @@ class PhysicianTransformer extends TransformerAbstract
      */
     private function convertToExperience($gradYear)
     {
-        $difference = Carbon::now()->year - 
-            Carbon::create($gradYear)->year;
+        // Guard against 'N/A'
+        if (is_numeric($gradYear)) {
 
-        if ($difference > 25) {
-            return '25+ years';
-        } elseif ($difference > 20) {
-            return '20+ years';
-        } elseif ($difference > 15) {
-            return '15+ years';
-        } elseif ($difference > 10) {
-            return '10+ years';
-        } elseif ($difference > 5) {
-            return '5+ years';
-        } 
+            $difference = Carbon::now()->year - 
+                Carbon::create($gradYear)->year;
 
-        return '2+ years';
+            if ($difference > 25) {
+                return '25+ years';
+            } elseif ($difference > 20) {
+                return '20+ years';
+            } elseif ($difference > 15) {
+                return '15+ years';
+            } elseif ($difference > 10) {
+                return '10+ years';
+            } elseif ($difference > 5) {
+                return '5+ years';
+            } 
+
+            return '2+ years';
+
+        }
     }
 
     /**
