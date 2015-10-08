@@ -135,6 +135,10 @@ class PhysicianController extends Controller
         Specialty $specialty, $distance
     )
     {
+        $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
+        $sort = $request->has('sort') ? $request->sort : 'asc';
+        
+
         $subspecialties = $this->getSubspecialties($specialty);
         $searchDistance = $request->distance ? $request->distance : $distance;
         //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
@@ -151,7 +155,7 @@ class PhysicianController extends Controller
             $searchDistance
         )
             ->whereIn('PrimaryPracticeFocusCode', $subspecialties )
-            ->orderBy('distance', 'asc')
+            ->orderBy($orderBy, $sort)
             ->paginate(10);
 
         // Instead of returning an empty Collection, let's return false
@@ -169,6 +173,9 @@ class PhysicianController extends Controller
         Specialty $specialty, $distance
     )
     {
+        $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
+        $sort = $request->has('sort') ? $request->sort : 'asc';
+        
         $searchDistance = $request->distance ? $request->distance : $distance;
         //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
 
@@ -184,7 +191,7 @@ class PhysicianController extends Controller
              $searchDistance
          )
          ->where('PrimaryPracticeFocusCode', '=', $specialty->code )
-         ->orderBy('distance', 'asc')
+         ->orderBy($orderBy, $sort)
          ->paginate(10);
     
         return $physicians;
@@ -230,6 +237,9 @@ class PhysicianController extends Controller
 //            ->orderBy('distance', 'asc')
 //            ->get();
 
+        $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
+        $sort = $request->has('sort') ? $request->sort : 'asc';
+
         $physicians = Physician::withinRadius(
             $request->lat, 
             $request->lon, 
@@ -238,7 +248,7 @@ class PhysicianController extends Controller
         ->where('last_name', 'like', $request->q . '%' )
         ->orWhere('first_name', 'like', $request->q . '%' )
         ->orWhere('PrimaryPracticeFocusArea', 'like', $request->q . '%' )
-        ->orderBy('distance', 'asc')
+        ->orderBy($orderBy, $sort)
         ->paginate(10);
 
         return $physicians;
@@ -398,6 +408,9 @@ class PhysicianController extends Controller
 //                        ->having('distance', '<', $searchDistance)
 //                        ->orderBy('distance', 'asc')
 //                        ->get();
+                        $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
+                        $sort = $request->has('sort') ? $request->sort : 'asc';
+        
                         $physicians = Physician::withinRadius(
                             $request->lat, 
                             $request->lon, 
@@ -405,7 +418,7 @@ class PhysicianController extends Controller
                         )
                         ->where('last_name', 'like', $request->name . '%')
                         ->orWhere('first_name', 'like', $request->name . '%')
-                        ->orderBy('distance', 'asc')
+                        ->orderBy($orderBy, $sort)
                         ->paginate(10);
 
                 }
@@ -437,6 +450,9 @@ class PhysicianController extends Controller
 //                    ->orderBy('distance', 'asc')
 //                    ->get();
 
+                $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
+                $sort = $request->has('sort') ? $request->sort : 'asc';
+        
                 $physicians = Physician::withinRadius(
                     $request->lat, 
                     $request->lon, 
@@ -444,7 +460,7 @@ class PhysicianController extends Controller
                 )
                 ->where('last_name', 'like', $request->name . '%')
                 ->orWhere('first_name', 'like', $request->name . '%')
-                ->orderBy('distance', 'asc')
+                ->orderBy($orderBy, $sort)
                 ->paginate(10);
             }
 
