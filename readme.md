@@ -17,3 +17,7 @@ ssh-add ~/.ssh/id_rsa
 $table->primary(['first', 'last']);
 ```
 
+#####Thu Oct  8 04:22:13 2015 CDT
+* SO: [How to use paginate() with a having() clause when column does not exist in table](http://stackoverflow.com/questions/19349397/how-to-use-paginate-with-a-having-clause-when-column-does-not-exist-in-table/20945960#20945960)
+
+
