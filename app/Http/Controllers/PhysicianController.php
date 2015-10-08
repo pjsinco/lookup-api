@@ -326,11 +326,11 @@ class PhysicianController extends Controller
         $physicians = Physician::withinRadius(
             $request->lat, 
             $request->lon, 
-            $searchDistance
+            $this->defaultDistance
         )
         ->where('last_name', 'like', $request->name . '%')
         ->orWhere('first_name', 'like', $request->name . '%')
-        ->paginate(10);
+        ->get();
 
         $queryMeta = [
             'city' => urldecode($request->city),
@@ -343,9 +343,10 @@ class PhysicianController extends Controller
         ];
 
         if (!empty($physicians)) {
-            return $this->response->withPaginator(
+            return $this->response->withCollection(
                 $physicians, 
                 new PhysicianTransformer,
+                null,
                 null,
                 $queryMeta
             );
