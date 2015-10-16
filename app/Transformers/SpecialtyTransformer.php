@@ -34,6 +34,7 @@ class SpecialtyTransformer extends TransformerAbstract
         return [
             'code' =>  $specialty['code'],
             'name' => $specialty['full'],
+            'is_parent' => $specialty['is_parent'],
         ];
 
     }
