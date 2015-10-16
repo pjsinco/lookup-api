@@ -14,7 +14,7 @@ class SpecialtyTableSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('specialties')->truncate();
 
-        $specialties = $this->getCsv('specialties.csv');
+        $specialties = $this->getCsv('specialties-eunice.csv');
 
         $this->seedTable($specialties);
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
@@ -32,6 +32,7 @@ class SpecialtyTableSeeder extends Seeder
             $specialty = App\Specialty::create([
                 'code' => $row[0],
                 'full' => $row[1],
+                'is_parent' => ($row[2] == 'yes' ? 1: 0),
             ]);
         }
     }

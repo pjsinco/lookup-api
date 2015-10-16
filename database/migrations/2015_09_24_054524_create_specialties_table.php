@@ -16,6 +16,7 @@ class CreateSpecialtiesTable extends Migration
             $table->increments('id');
             $table->char('code', 4)->unique();
             $table->string('full', 128);
+            $table->boolean('is_parent');
         });
     }
 
