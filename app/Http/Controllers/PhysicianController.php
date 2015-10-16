@@ -137,7 +137,7 @@ class PhysicianController extends Controller
     {
         $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
         $sort = $request->has('sort') ? $request->sort : 'asc';
-        
+        $limit = $request->has('per_page') ? $request->per_page : '25';
 
         $subspecialties = $this->getSubspecialties($specialty);
         $searchDistance = $request->distance ? $request->distance : $distance;
@@ -156,7 +156,7 @@ class PhysicianController extends Controller
         )
             ->whereIn('PrimaryPracticeFocusCode', $subspecialties )
             ->orderBy($orderBy, $sort)
-            ->paginate(10);
+            ->paginate($limit);
 
         // Instead of returning an empty Collection, let's return false
         return $physicians;
@@ -175,6 +175,8 @@ class PhysicianController extends Controller
     {
         $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
         $sort = $request->has('sort') ? $request->sort : 'asc';
+        $limit = $request->has('per_page') ? $request->per_page : '25';
+
         
         $searchDistance = $request->distance ? $request->distance : $distance;
         //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
@@ -192,7 +194,7 @@ class PhysicianController extends Controller
          )
          ->where('PrimaryPracticeFocusCode', '=', $specialty->code )
          ->orderBy($orderBy, $sort)
-         ->paginate(10);
+         ->paginate($limit);
     
         return $physicians;
     }
@@ -239,6 +241,8 @@ class PhysicianController extends Controller
 
         $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
         $sort = $request->has('sort') ? $request->sort : 'asc';
+        $limit = $request->has('per_page') ? $request->per_page : '25';
+
 
         $physicians = Physician::withinRadius(
             $request->lat, 
@@ -249,7 +253,7 @@ class PhysicianController extends Controller
         ->orWhere('first_name', 'like', $request->q . '%' )
         ->orWhere('PrimaryPracticeFocusArea', 'like', $request->q . '%' )
         ->orderBy($orderBy, $sort)
-        ->paginate(10);
+        ->paginate($limit);
 
         return $physicians;
     }
@@ -281,7 +285,7 @@ class PhysicianController extends Controller
             //->get();
         $physicians = Physician::withinRadius($lat, $lon, $searchDistance)
             ->orderBy('distance', 'asc')
-            ->paginate(10);
+            ->paginate($limit);
 
         $count = (string)count($physicians);
         return json_encode(['count' => $count]);
@@ -411,6 +415,8 @@ class PhysicianController extends Controller
 //                        ->get();
                         $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
                         $sort = $request->has('sort') ? $request->sort : 'asc';
+                        $limit = $request->has('per_page') ? $request->per_page : '25';
+
         
                         $physicians = Physician::withinRadius(
                             $request->lat, 
@@ -420,7 +426,7 @@ class PhysicianController extends Controller
                         ->where('last_name', 'like', $request->name . '%')
                         ->orWhere('first_name', 'like', $request->name . '%')
                         ->orderBy($orderBy, $sort)
-                        ->paginate(10);
+                        ->paginate($limit);
 
                 }
 
@@ -453,6 +459,8 @@ class PhysicianController extends Controller
 
                 $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
                 $sort = $request->has('sort') ? $request->sort : 'asc';
+                $limit = $request->has('per_page') ? $request->per_page : '25';
+
         
                 $physicians = Physician::withinRadius(
                     $request->lat, 
@@ -462,7 +470,7 @@ class PhysicianController extends Controller
                 ->where('last_name', 'like', $request->name . '%')
                 ->orWhere('first_name', 'like', $request->name . '%')
                 ->orderBy($orderBy, $sort)
-                ->paginate(10);
+                ->paginate($limit);
             }
 
         }
