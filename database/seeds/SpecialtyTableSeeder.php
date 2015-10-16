@@ -33,6 +33,7 @@ class SpecialtyTableSeeder extends Seeder
                 'code' => $row[0],
                 'full' => $row[1],
                 'is_parent' => ($row[2] == 'yes' ? 1: 0),
+                'is_dupe' => ($row[3] == 'yes' ? 1: 0),
             ]);
         }
     }

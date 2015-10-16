@@ -35,6 +35,7 @@ class SpecialtyTransformer extends TransformerAbstract
             'code' =>  $specialty['code'],
             'name' => $specialty['full'],
             'is_parent' => $specialty['is_parent'],
+            'is_dupe' => $specialty['is_dupe'],
         ];
 
     }
