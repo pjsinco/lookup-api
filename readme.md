@@ -88,3 +88,5 @@ const DISTANCE_UNIT_MILES      = 69.0;
     }
 ))>))}
 ```
+
+* SO: [Laravel connection to sql server](http://stackoverflow.com/questions/23008924/laravel-connection-to-sql-server)
