@@ -32,3 +32,24 @@ Route::group(['prefix' => 'api/v1'], function() {
 });
 
 Route::get('locations/try-this-one', 'LocationController@tryThisOne');
+
+Route::get('test/mssql/{id}', function($id) {
+    $user = env('MSSQL_USERNAME');
+    $password = env('MSSQL_PASSWORD');
+
+    $db = new PDO(
+        'dblib:host=sql05-1.aoanet.local;dbname=imis', 
+        $user, 
+        $password
+    );
+
+    $q = "select * from imis.dbo.vfindyourdo where id = $id";
+    //$stmt = $db->query($q);
+    $stmt = $db->prepare($q);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+     
+    $current = App\Physician::where('aoa_mem_id', '=', (int) $row['id'])->first();
+});
+
+
