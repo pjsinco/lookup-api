@@ -15,11 +15,11 @@ class CreateImisRaw extends Migration
         Schema::create('imis_raw', function (Blueprint $table) {
             $table->string('id');
             $table->string('full_name');
-            $table->string('prefix', 24);
+            $table->string('prefix', 24)->nullable();
             $table->string('first_name');
-            $table->string('middle_name');
+            $table->string('middle_name')->nullable();
             $table->string('last_name');
-            $table->string('suffix', 24);
+            $table->string('suffix', 24)->nullable();
             $table->string('designation', 24);
             $table->string('SortColumn');
             $table->string('MemberStatus', 48);
@@ -29,24 +29,24 @@ class CreateImisRaw extends Migration
             $table->string('Country');
             $table->string('COLLEGE_CODE');
             $table->string('YearOfGraduation', 16);
-            $table->string('fellows');
+            $table->string('fellows')->nullable();
             $table->string('PrimaryPracticeFocusCode', 16);
             $table->string('PrimaryPracticeFocusArea');
-            $table->string('SecondaryPracticeFocusCode', 16);
-            $table->string('SecondaryPracticeFocusArea');
-            $table->string('website');
-            $table->string('AOABoardCertified');
+            $table->string('SecondaryPracticeFocusCode', 16)->nullable();
+            $table->string('SecondaryPracticeFocusArea')->nullable();
+            $table->string('website')->nullable();
+            $table->string('AOABoardCertified')->nullable();
             $table->string('address_1');
-            $table->string('address_2');
-            $table->string('Phone', 16);
-            $table->string('Email');
+            $table->string('address_2')->nullable();
+            $table->string('Phone', 16)->nullable();
+            $table->string('Email')->nullable();
             $table->string('ABMS');
             $table->string('Gender', 1);
-            $table->string('CERT1');
-            $table->string('CERT2');
-            $table->string('CERT3');
-            $table->string('CERT4');
-            $table->string('CERT5');
+            $table->string('CERT1')->nullable();
+            $table->string('CERT2')->nullable();
+            $table->string('CERT3')->nullable();
+            $table->string('CERT4')->nullable();
+            $table->string('CERT5')->nullable();
         });
     }
 
