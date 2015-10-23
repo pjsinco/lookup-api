@@ -33,7 +33,19 @@ Route::group(['prefix' => 'api/v1'], function() {
 
 Route::get('locations/try-this-one', 'LocationController@tryThisOne');
 
-Route::get('refresh', 'RefreshController@refresh');
+Route::get('refresh/', 'RefreshController@refresh');
+
+Route::get('test/escape', function() {
+
+    $results = DB::selectOne(DB::raw("select *
+            from temp_locations
+            where address_1 = :address
+                and City = :city"), 
+        array( 'address' => "901 St Mary's Dr #200", 'city' => "Evansville")
+    );
+dd($results);
+
+});
 
 Route::get('test/mssql/{id}', function($id) {
     $user = env('MSSQL_USERNAME');

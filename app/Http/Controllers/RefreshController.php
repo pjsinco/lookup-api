@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use DB;
+use Log;
 use Stanley\Geocodio\Client;
 
 class RefreshController extends Controller
@@ -52,154 +53,218 @@ class RefreshController extends Controller
     ];
 
     private $tempLocationTable = 'temp_locations';
+    private $countGeoLocated = 0;
+    private $countImisRaw = 0;
 
     public function refresh()
     {
-        //$stmt = $this->getPdoStatementForImisRows();
+        ini_set('max_execution_time', 300);
+
+        Log::info('Visited refresh page'); // TODO make info more useful
 
         $this->refreshImisRawTable();
 
-        $this->createTempLocationTable();
+        $createdTempTable = $this->createTempLocationTable();
 
-        $this->createNewPhysicianModels();
+        $populatedTempTable = $this->populateTempLocationTable(); 
+            
+        $this->createPhysicianModels();
 
-        $this->dropTempLocationTable();
-
-        //while (($physician = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
-        //    $aoa_mem_id = (int) $physician['id'];
-        //    $current = $this->getCurrentPhysician($aoa_mem_id);
-        //
-        //    if (!$current) {
-        //        $this->addPhysician($physician);
-        //    }
-        //}
+        $query = $this->dropTempLocationTable();
     }
 
-    private function geolocate($physician)
+    private function parseGeoData($geoDataRaw)
     {
-        $client = new Client('aca4585cbbdf2f8589c58bb4606c56fd45db3bb');
-        $data = sprintf(
-            '%s, %s, %s %s',
-            $physician['address_1'],
-            $physician['City'],
-            $physician['State'],
-            $physician['Zip']
-        );
-
-        $geoData = $client->get($data);
-
-dd($geoData);
-
-        return $geoData;
-    }
-
-    private function dropTempLocationTable()
-    {
-        return DB::statement('drop table ?', [$this->tempLocationTable]);
-    }
-
-    private function getPhysicianLocationData($physician)
-    {
-        $data = DB::select("
-            select * 
-            from ? 
-            where address_1 = ?
-                and address_2 = ?
-                and City = ?
-                and State_Province = ?
-                and Zip = ?
-            ", [
-                $this->tempLocationTable, 
-                $row[23],
-                $row[24],
-                $row[10],
-                $row[11],
-                $row[12],
-            ]
-        );
-
-        if (empty($data)) {
-            $data = $this->geolocate($physician);
-        }
+dd($geoDataRaw);
+        $data = new \StdClass();
+        $data->lat = $geoDataRaw->response->results[0]->location->lat;
+        $data->lon = $geoDataRaw->response->results[0]->location->lng;
+        $data->geo_city = 
+            $geoDataRaw->response->results[0]->address_components->city;
+        $data->geo_state = 
+            $geoDataRaw->response->results[0]->address_components->state;
+        $data->geo_confidence = $geoDataRaw->response->results[0]->accuracy;
+        $data->geo_matches = 0;
 
         return $data;
     }
 
-    private function createNewPhysicianModels()
+    private function geolocate($physician)
+    {
+        Log::notice('Fetching geolocation data for ' . $physician->full_name);
+
+        $client = new Client('aca4585cbbdf2f8589c58bb4606c56fd45db3bb');
+        $data = sprintf(
+            '%s, %s, %s %s',
+            $physician->address_1,
+            $physician->City,
+            $physician->State_Province,
+            $physician->Zip
+        );
+
+        try {
+            $geoDataRaw = $client->get($data);
+            $geoData = $this->parseGeoData($geoDataRaw);
+
+            return $geoData;
+        } catch (GeocodioAuthError $gae) {
+            Log::warning('Error geolocating ' . $physician['full_name'] . 
+                ': ' . $gae->getMessage());
+        } catch (GeocodioDataError $gde) {
+            Log::warning('Error geolocating ' . $physician['full_name'] . 
+                ': ' . $gae->getMessage());
+        } catch (GeocodioServerError $gse) {
+            Log::warning('Error geolocating ' . $physician['full_name'] . 
+                ': ' . $gae->getMessage());
+        }
+    }
+
+    private function dropTempLocationTable()
+    {
+        return DB::statement("drop table if exists $this->tempLocationTable");
+    }
+
+    private function getPhysicianLocationData($physician)
+    {
+
+        $geoData = DB::selectOne("select *
+                from $this->tempLocationTable
+                where address_1 = :address
+                    and City = :city
+                    and State_Province = :state
+                    and Zip = :zip
+            ", [
+                'address' => $physician->address_1,
+                'city' => $physician->City,
+                'state' => $physician->State_Province,
+                'zip' => $physician->Zip,
+            ]
+        );
+//        $q = "
+//            select * 
+//            from $this->tempLocationTable
+//            where address_1 = \"$physician->address_1\"
+//                and City = \"$physician->City\" 
+//                and State_Province = \"$physician->State_Province\"
+//                and Zip = \"$physician->Zip\"
+//        ";
+//
+//        $geoData = DB::selectOne($q);
+
+        if (empty($geoData)) {
+            $geoData = $this->geolocate($physician);
+        }
+
+        return $geoData;
+    }
+
+    private function createPhysicianModels()
     {
         DB::table('physicians')->truncate();
 
-        $rows = DB::select('select * from imis_raw');
+        $rows = DB::select(DB::raw('select * from imis_raw'));
 
-        foreach ($rows as $lineIndex => $row) {
-            
+        foreach ($rows as $row) {
+
             $locationData = $this->getPhysicianLocationData($row);
 
-
-            $physician = App\Physician::create([
-                'aoa_mem_id'                 => $row[0],
-                'full_name'                  => $row[1],
-                'prefix'                     => $row[2],
-                'first_name'                 => $row[3],
-                'middle_name'                => $row[4],
-                'last_name'                  => $row[5],
-                'suffix'                     => $row[6],
-                'designation'                => $row[7],
-                'SortColumn'                 => $row[8],
-                'MemberStatus'               => $row[9],
-                'City'                       => $row[10],
-                'State_Province'             => $row[11],
-                'Zip'                        => $row[12],
-                'Country'                    => $row[13],
-                'COLLEGE_CODE'               => $row[14],
-                'YearOfGraduation'           => $row[15],
-                'fellows'                    => $row[16],
-                'PrimaryPracticeFocusCode'   => $row[17],
-                'PrimaryPracticeFocusArea'   => $row[18],
-                'SecondaryPracticeFocusCode' => $row[19],
-                'SecondaryPracticeFocusArea' => $row[20],
-                'website'                    => $row[21],
-                'AOABoardCertified'          => ($row[22] == 'YES' ? 1 : 0),
-                'address_1'                  => $row[23],
-                'address_2'                  => $row[24],
-                'Phone'                      => $row[25],
-                'Email'                      => $row[26],
-                'ABMS'                       => ($row[27] == 'YES' ? 1 : 0),
-                'Gender'                     => $row[28],
-                'CERT1'                      => $row[29],
-                'CERT2'                      => $row[30],
-                'CERT3'                      => $row[31],
-                'CERT4'                      => $row[32],
-                'CERT5'                      => $row[33],
-                'lat'                        => $locationData['lat'],
-                'lon'                        => $locationData['lon'],
-                'geo_confidence'             => $locationData['geo_confidence'],
-                'geo_city'                   => $locationData['geo_city'],
-                'geo_state'                  => $locationData['geo_state'],
-                'geo_matches'                => ($locationdata['matches'] == 'True' ? 1 : 0),
+            $physician = \App\Physician::create([
+                'aoa_mem_id'                 => $row->id,
+                'full_name'                  => $row->full_name,
+                'prefix'                     => $row->prefix,
+                'first_name'                 => $row->first_name,
+                'middle_name'                => $row->middle_name,
+                'last_name'                  => $row->last_name,
+                'suffix'                     => $row->suffix,
+                'designation'                => $row->designation,
+                'SortColumn'                 => $row->SortColumn,
+                'MemberStatus'               => $row->MemberStatus,
+                'City'                       => $row->City,
+                'State_Province'             => $row->State_Province,
+                'Zip'                        => $row->Zip,
+                'Country'                    => $row->Country,
+                'COLLEGE_CODE'               => $row->COLLEGE_CODE,
+                'YearOfGraduation'           => $row->YearOfGraduation,
+                'fellows'                    => $row->fellows,
+                'PrimaryPracticeFocusCode'   => $row->PrimaryPracticeFocusCode,
+                'PrimaryPracticeFocusArea'   => $row->PrimaryPracticeFocusArea,
+                'SecondaryPracticeFocusCode' => $row->SecondaryPracticeFocusCode,
+                'SecondaryPracticeFocusArea' => $row->SecondaryPracticeFocusArea,
+                'website'                    => $row->website,
+                'AOABoardCertified'          => ($row->AOABoardCertified == 'YES' ? 1 : 0),
+                'address_1'                  => $row->address_1,
+                'address_2'                  => $row->address_2,
+                'Phone'                      => $row->Phone,
+                'Email'                      => $row->Email,
+                'ABMS'                       => ($row->ABMS == 'YES' ? 1 : 0),
+                'Gender'                     => $row->Gender,
+                'CERT1'                      => $row->CERT1,
+                'CERT2'                      => $row->CERT2,
+                'CERT3'                      => $row->CERT3,
+                'CERT4'                      => $row->CERT4,
+                'CERT5'                      => $row->CERT5,
+                'lat'                        => $locationData->lat,
+                'lon'                        => $locationData->lon,
+                'geo_confidence'             => $locationData->geo_confidence,
+                'geo_city'                   => $locationData->geo_city,
+                'geo_state'                  => $locationData->geo_state,
+                'geo_matches'                => $locationData->geo_matches,
             ]);
         }
         
     }
 
+    private function populateTempLocationTable()
+    {
+        $q = "
+            INSERT INTO $this->tempLocationTable
+                SELECT City, State_Province, Zip, address_1, address_2, 
+                    lat, lon, geo_confidence, geo_city, geo_state, geo_matches
+                FROM physicians;
+        ";
+
+        $result = DB::statement($q);
+
+        if (!$result) {
+            Log::error('Could not populate ' . $this->tempLocationTable);
+        } else {
+            Log::info('Successfully populated ' . $this->tempLocationTable);
+        }
+
+        return $result;
+    }
+
     private function createTempLocationTable()
     {
+        
+        $this->dropTempLocationTable();
 
-        DB::statement("
+        $q = "
             CREATE TABLE IF NOT EXISTS $this->tempLocationTable (
                 City VARCHAR(255),
                 State_Province VARCHAR(16),
                 Zip VARCHAR(16),
                 address_1 VARCHAR(255),
-                address_2 VARCHAR(255) 
+                address_2 VARCHAR(255),
+                lat FLOAT(10, 6),
+                lon FLOAT(10, 6),
+                geo_confidence VARCHAR(255),
+                geo_city VARCHAR(255),
+                geo_state VARCHAR(255),
+                geo_matches BOOLEAN
             );
-        ");
+        ";
 
-        DB::statement("
-            INSERT INTO $this->tempLocationTable
-                SELECT City, State_Province, Zip, address_1, address_2
-                FROM physicians;
-        ");
+        $result = DB::statement($q);
+
+        if (!$result) {
+            Log::error('Could not create ' . $this->tempLocationTable);
+        } else {
+            Log::info('Successfully created ' . $this->tempLocationTable);
+        }
+
+        return $result;
+        
     }
 
     private function refreshImisRawTable()
@@ -209,30 +274,46 @@ dd($geoData);
         $user = env('MSSQL_USERNAME');
         $password = env('MSSQL_PASSWORD');
 
-        $db = new \PDO(
-            'dblib:host=sql05-1.aoanet.local;dbname=imis', 
-            $user, 
-            $password
-        );
+        try {
+            $db = new \PDO(
+                'dblib:host=sql05-1.aoanet.local;dbname=imis', 
+                $user, 
+                $password
+            );
 
-        $q = "
-            SELECT * 
-            FROM imis.dbo.vFindYourDO 
-            WHERE country = 'USA'
-                and not (first_name like '%test%' or 
-                    first_name like '%AOA%'
-                )
-            ORDER BY id
-        ";
-        $stmt = $db->prepare($q);
-        $stmt->execute();
+            $q = "
+                SELECT * 
+                FROM imis.dbo.vFindYourDO 
+                WHERE country = 'USA'
+                    and not (first_name like '%test%' or 
+                        first_name like '%AOA%'
+                    )
+                ORDER BY id
+            ";
 
-        while (($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
-            DB::table('imis_raw')
-                ->insert($row);
-            //DB::insert('insert into imis_raw values(');
+            $stmt = $db->prepare($q);
+
+            if ($stmt) {
+                $stmt->execute();
+            }
+    
+            $rowCount = 0;
+
+            while (($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
+                $rowCount++;
+                DB::table('imis_raw')
+                    ->insert($row);
+            }
+            
+            Log::info(sprintf(
+                'Refreshing imis_raw table: %d rows',
+                $rowCount
+            ));
+
+        } catch (\PDOException $e) {
+            Log::error($e->getMessage());
         }
-        
+
     }
 
     private function checkImisTableHeaders()
