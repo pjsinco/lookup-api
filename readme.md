@@ -90,3 +90,25 @@ const DISTANCE_UNIT_MILES      = 69.0;
 ```
 
 * SO: [Laravel connection to sql server](http://stackoverflow.com/questions/23008924/laravel-connection-to-sql-server)
+
+#####Thu Oct 22 16:46:35 2015 CDT
+>Let’s call your current data table “F”
+> 
+>COPY the distinct address/city/state and lat lon fields from “F” to another table, call that table “LL”.
+>    This should be doable in one mysql “copy table” or “create table as select…” or “insert as select …” statement.
+> 
+>Overwrite table “F” with the new/current data from the imis database
+>    It’s simplest to just truncate (i.e., discard all data) and replace it in full.
+>    You might consider creating the new table with a temporary name, then dropping the old table and renaming it only after you know you have the new data safe-and-sound.
+> 
+>Reset the lat lon fields in all records in “F” to null
+> 
+>For each record in “F” where address/city/state exists in LL, copy the latlon from LL to F.
+>    Again, this should be doable in one sql update statement
+> 
+>For each record in “F” where lat lon is still blank, go get it from your service.
+ 
+* StackEx: [Copy from one MySQL table to another MySQL table of same database](http://dba.stackexchange.com/questions/72042/copy-from-one-mysql-table-to-another-mysql-table-of-same-database)
+
+#####Fri Oct 23 04:21:15 2015 CDT
+* Github: [Geocod.io PHP](https://github.com/davidstanley01/geocodio-php)
