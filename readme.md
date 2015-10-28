@@ -120,7 +120,7 @@ const DISTANCE_UNIT_MILES      = 69.0;
 
 #####Wed Oct 28 16:36:49 2015 CDT
 * Manual refresh
-    1. Export physicians table as CSV
+    1. Export physicians table as CSV [source]](http://www.tech-recipes.com/rx/1475/save-mysql-query-results-into-a-text-or-csv-file/)
 ```sql
 select * 
 from physicians  
