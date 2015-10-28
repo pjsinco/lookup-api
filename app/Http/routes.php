@@ -33,7 +33,7 @@ Route::group(['prefix' => 'api/v1'], function() {
 
 Route::get('locations/try-this-one', 'LocationController@tryThisOne');
 
-Route::get('refresh/', 'RefreshController@refresh');
+//Route::get('refresh/', 'RefreshController@refresh');
 
 Route::get('test/escape', function() {
 
