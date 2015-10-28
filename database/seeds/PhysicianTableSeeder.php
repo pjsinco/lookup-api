@@ -13,7 +13,7 @@ class PhysicianTableSeeder extends Seeder
     {
         DB::table('physicians')->truncate();
 
-        $physicians = $this->getCsv('physicians-2015-10-23-geocoded.csv');
+        $physicians = $this->getCsv('physicians-2015-10-28-geocoded.csv');
         $this->seedTable($physicians);
     }
 

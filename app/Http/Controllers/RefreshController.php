@@ -12,7 +12,7 @@ use Stanley\Geocodio\Client;
 class RefreshController extends Controller
 {
     private $tempLocationTable = 'temp_locations';
-    private $countGeoLocated = 0;
+    private $countGeolocated = 0;
     private $countImisRaw = 0;
 
     public function refresh()
@@ -31,7 +31,7 @@ class RefreshController extends Controller
 
         $query = $this->dropTempLocationTable();
 
-        Log::info('Geolocoated ' . $this->countGeoLocated . ' physicians');
+        Log::info('Geolocoated ' . $this->countGeolocated . ' physicians');
     }
 
     private function parseGeoData($geoDataRaw)
