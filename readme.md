@@ -1,5 +1,5 @@
 # Lookup API
-#When things aren't working
+#####When things aren't working
 ```
 php artisan cache:clear 
 composer dump-autoload
@@ -117,3 +117,22 @@ const DISTANCE_UNIT_MILES      = 69.0;
 
 #####Fri Oct 23 04:21:15 2015 CDT
 * Github: [Geocod.io PHP](https://github.com/davidstanley01/geocodio-php)
+
+#####Wed Oct 28 16:36:49 2015 CDT
+* Manual refresh
+    1. Export physicians table as CSV
+```sql
+select * 
+from physicians  
+into outfile '/tmp/physicians-2015-10-18-geocoded.csv' 
+fields
+     terminated by ','
+     enclosed by '"'
+lines
+     terminated by '\n';"'
+```
+    2. Open CSV in Excel. Delete these columns: ```created_at```, ```updated_at```, ```id```
+    3. Fix line-endings in TextMate
+    4. On local: ```php artisan migrate:refresh --seed```
+    5. scp the CSV file to production
+    6. Run the migration on production
