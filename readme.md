@@ -122,7 +122,7 @@ const DISTANCE_UNIT_MILES      = 69.0;
 * Manual refresh
     1. Export physicians table as CSV [source]](http://www.tech-recipes.com/rx/1475/save-mysql-query-results-into-a-text-or-csv-file/)
 ```sql
-select * 
+select id,full_name,prefix,first_name,middle_name,last_name,suffix,designation,SortColumn,MemberStatus,City,State_Province,Zip,Country,COLLEGE_CODE,YearOfGraduation,fellows,PrimaryPracticeFocusCode,PrimaryPracticeFocusArea,SecondaryPracticeFocusCode,SecondaryPracticeFocusArea,website,AOABoardCertified,address_1,address_2,Phone,Email,ABMS,Gender,CERT1,CERT2,CERT3,CERT4,CERT5,lat,lon,geo_confidence,geo_city,geo_state,geo_matches
 from physicians  
 into outfile '/tmp/physicians-2015-10-18-geocoded.csv' 
 fields
@@ -131,8 +131,9 @@ fields
 lines
      terminated by '\n';"'
 ```
-    2. Open CSV in Excel. Delete these columns: ```created_at```, ```updated_at```, ```id```
-    3. Fix line-endings in TextMate
-    4. On local: ```php artisan migrate:refresh --seed```
-    5. scp the CSV file to production
-    6. Run the migration on production
+    2. Fix line-endings in TextMate
+    3. On local: ```php artisan migrate:refresh --seed```
+    4. scp the CSV file to production
+    5. Run the migration on production
+
+* SO: [Script to trim 7 columns to 5 ( csv file )](http://stackoverflow.com/questions/9814272/script-to-trim-7-columns-to-5-csv-file)
