@@ -14,7 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \App\Console\Commands\Inspire::class,
-        \App\Console\Commands\CreateImisTable::class,
+        \App\Console\Commands\RefreshPhysicians::class,
     ];
 
     /**

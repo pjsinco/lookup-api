@@ -7,14 +7,14 @@ use DB;
 use Log;
 use Stanley\Geocodio\Client;
 
-class CreateImisTable extends Command
+class RefreshPhysicians extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'imis:create';
+    protected $signature = 'physicians:refresh';
 
     /**
      * The console command description.
