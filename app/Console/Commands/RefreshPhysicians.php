@@ -14,7 +14,7 @@ class RefreshPhysicians extends Command
      *
      * @var string
      */
-    protected $signature = 'physicians:refresh {--frombackup}';
+    protected $signature = 'physicians:refresh {--frombackup} {--imistableonly}';
 
     /**
      * The console command description.
@@ -171,7 +171,10 @@ class RefreshPhysicians extends Command
 
             }
             return;
-        } 
+        } else if ($this->option('imistableonly')) {
+            $this->refreshImisTable();
+            return;
+        }
         
         $this->refreshImisTable();
         $this->createTempTable();
