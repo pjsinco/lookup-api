@@ -1,6 +1,6 @@
 <?php
 
-namespace Elit\RefreshFromImis;
+namespace Elit;
 
 use DB;
 use Log;
