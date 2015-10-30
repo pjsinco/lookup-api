@@ -47,16 +47,24 @@ class RefreshFromImis
 
             if ($stmt) {
                 $stmt->execute();
-echo '<pre>'; var_dump($stmt->rowCount()); echo '</pre>'; die();                 
             }
     
             $rowCount = 0;
 
-            while (($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
-                $rowCount++;
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+var_dump(count($rows)); die();
+
+            foreach ($rows as $row) {
                 DB::table('imis_raw')
                     ->insert($row);
             }
+
+//            while (($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
+//                $rowCount++;
+//                DB::table('imis_raw')
+//                    ->insert($row);
+//            }
             
             $msg = sprintf('Refreshing imis_raw table: %d rows', $rowCount);
 
