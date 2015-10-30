@@ -119,7 +119,7 @@ class PhysicianTransformer extends TransformerAbstract
     private function convertCertificationsToString($certs)
     {
         $certs = array_filter($certs, function($cert) {
-            return $cert != '';
+            return trim($cert) != '';
         });
 
         $count = count($certs);
