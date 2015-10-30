@@ -26,7 +26,8 @@ class PhysicianTableSeeder extends Seeder
     private function seedTable($data)
     {
         foreach ($data as $lineIndex => $row) {
-            $physician = App\Physician::create([
+            //$physician = App\Physician::create([
+            DB::table('physicians')->insert([
                 'aoa_mem_id'                 => $row[0],
                 'full_name'                  => $row[1],
                 'prefix'                     => $row[2],
