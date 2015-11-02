@@ -84,6 +84,7 @@ class RefreshFromImis
                     and not (first_name like '%test%' or 
                         first_name like '%AOA%'
                     )
+                    and not (id in (037695, 058036))
                 ORDER BY id
             ";
 
