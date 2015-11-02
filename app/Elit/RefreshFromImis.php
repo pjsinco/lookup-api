@@ -57,6 +57,34 @@ class RefreshFromImis
         }
     }
 
+    public static function getPhysiciansToBeAdded()
+    {
+        $q = "
+            SELECT full_name
+            FROM imis_raw
+            WHERE full_name NOT IN (
+                SELECT full_name
+                FROM physicians
+            );
+        ";
+
+        return DB::select($q);
+    }
+
+    public static function getPhysiciansToBeRemoved()
+    {
+        $q = "
+            SELECT full_name
+            FROM physicians
+            WHERE full_name NOT IN (
+                SELECT full_name
+                FROM imis_raw
+            );
+        ";
+
+        return DB::select($q);
+    }
+
     public static function getConnection()
     {
         $user = env('MSSQL_USERNAME');

@@ -145,6 +145,36 @@ class RefreshPhysicians extends Command
         return DB::statement($q);
     }
 
+    private function showPhysiciansToBeAdded()
+    {
+        $newPhysicians = RefreshFromImis::getPhysiciansToBeAdded();
+        $this->info(
+            PHP_EOL . 
+            sprintf('%d new physicians:', count($newPhysicians))
+        );
+
+        foreach ($newPhysicians as $name) {
+            $this->info("\t" . $name->full_name);
+        }
+
+        $this->info(PHP_EOL);
+    }
+
+    private function showPhysiciansToBeRemoved()
+    {
+        $removedPhysicians = RefreshFromImis::getPhysiciansToBeRemoved();
+        $this->info(
+            PHP_EOL .  
+            sprintf('%d physicians to be removed:', count($removedPhysicians))
+        );
+
+        foreach ($removedPhysicians as $name) {
+            $this->info("\t" . $name->full_name);
+        }
+
+        $this->info(PHP_EOL);
+    }
+
     /**
      * Execute the console command.
      *
@@ -177,6 +207,8 @@ class RefreshPhysicians extends Command
         }
         
         $this->refreshImisTable();
+        $this->showPhysiciansToBeAdded();
+        $this->showPhysiciansToBeRemoved();
         $this->createTempTable();
         $this->populateTempTable();
         $this->createPhysicianModels();
