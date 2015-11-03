@@ -7,6 +7,7 @@ use DB;
 use Log;
 use Schema;
 use Stanley\Geocodio\Client;
+use Monolog\Logger;
 
 /**
  * Update Find Your DO data with data from iMis.
@@ -99,7 +100,7 @@ class RefreshFromImis
         return $db;
     }
 
-    public static function getRows()
+    public static function getRows(Logger $log)
     {
         try {
 
@@ -130,7 +131,8 @@ class RefreshFromImis
             return $results;
 
         } catch (\PDOException $e) {
-            Log::error($e->getMessage());
+            $log->error($e->getMessage());
+            //Log::error($e->getMessage());
             $db = null;
         }
     }
@@ -145,9 +147,10 @@ class RefreshFromImis
         }
     }
     
-    public static function truncateImisTable()
+    public static function truncateImisTable(Logger $log)
     {
         DB::table('imis_raw')->truncate();
+        $log->info('Truncated imis_raw');
     }
 
     public static function dropTempLocationTable()
@@ -285,9 +288,10 @@ class RefreshFromImis
         return $data;
     }
 
-    public static function geolocate($physician)
+    public static function geolocate($physician, $log)
     {
         Log::notice('Fetching geolocation data for ' . $physician->full_name);
+        $log->notice('Fetching geolocation data for ' . $physician->full_name);
 
         $client = new Client(env('GEOCODIO_KEY'));
         $data = sprintf(
@@ -306,16 +310,22 @@ class RefreshFromImis
         } catch (GeocodioAuthError $gae) {
             Log::warning('Error geolocating ' . $physician['full_name'] . 
                 ': ' . $gae->getMessage());
+            $log->warning('Error geolocating ' . $physician['full_name'] . 
+                ': ' . $gae->getMessage());
         } catch (GeocodioDataError $gde) {
             Log::warning('Error geolocating ' . $physician['full_name'] . 
                 ': ' . $gae->getMessage());
+            $log->warning('Error geolocating ' . $physician['full_name'] . 
+                ': ' . $gde->getMessage());
         } catch (GeocodioServerError $gse) {
             Log::warning('Error geolocating ' . $physician['full_name'] . 
-                ': ' . $gae->getMessage());
+                ': ' . $gse->getMessage());
+            $log->warning('Error geolocating ' . $physician['full_name'] . 
+                ': ' . $gse->getMessage());
         }
     }
 
-    private static function getPhysicianLocationData($physician)
+    private static function getPhysicianLocationData($physician, Logger $log)
     {
         $geoData = DB::selectOne("select *
                 from " . self::$tempLocationTable . "
@@ -332,16 +342,16 @@ class RefreshFromImis
         );
 
         if (empty($geoData)) {
-            $geoData = self::geolocate($physician);
+            $geoData = self::geolocate($physician, $log);
         }
 
         return $geoData;
     }
 
-    public static function createPhysicianModel($row)
+    public static function createPhysicianModel($row, Logger $log)
     {
 
-        $locationData = self::getPhysicianLocationData($row);
+        $locationData = self::getPhysicianLocationData($row, $log);
 
         if (!$locationData) { 
             Log::error('Could not geolocate ' . $row->full_name);

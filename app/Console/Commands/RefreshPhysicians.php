@@ -6,6 +6,10 @@ use Illuminate\Console\Command;
 use DB;
 use Log;
 use Elit\RefreshFromImis;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Carbon\Carbon;
+
 
 class RefreshPhysicians extends Command
 {
@@ -24,6 +28,13 @@ class RefreshPhysicians extends Command
     protected $description = 'Create a table of the latest Find Your DO data';
 
     /**
+     * Log for the refresh.
+     *
+     */
+    private $log;
+    private $logName;
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -32,20 +43,38 @@ class RefreshPhysicians extends Command
     {
         parent::__construct();
 
+        $this->logName =
+            sprintf(
+                'refresh-%s-%s', 
+                Carbon::now()->toDateString(),
+                Carbon::now()->toTimeString()
+            );
+
+        $this->log = new Logger($this->logName);
+
+        $this->log->pushHandler(
+            new StreamHandler(storage_path('logs/' . $this->logName)), 
+            Logger::INFO
+        );
+
+        $this->log->info('Starting refresh ...');
     }
 
     private function refreshImisTable()
     {
-        RefreshFromImis::truncateImisTable();
+        RefreshFromImis::truncateImisTable($this->log);
 
         $this->info(PHP_EOL.'Fetching rows from iMIS ...'.PHP_EOL);
+        $this->log->info(PHP_EOL.'Fetching rows from iMIS ...'.PHP_EOL);
 
-        $rows = RefreshFromImis::getRows();
+        $rows = RefreshFromImis::getRows($this->log);
 
-        $this->info(sprintf('Retrieved %d rows'.PHP_EOL, count($rows)));
+        $this->info(sprintf('Retrieved %d rows from iMIS'.PHP_EOL, count($rows)));
+        $this->log->info(sprintf('Retrieved %d rows from iMIS', count($rows)));
 
         $bar = $this->output->createProgressBar(count($rows));
         $this->info('Adding rows to imis_raw' . PHP_EOL);
+        $this->log->info('Adding rows to imis_raw' . PHP_EOL);
 
         $rowCount = 0;
 
@@ -60,11 +89,12 @@ class RefreshPhysicians extends Command
         $bar->finish();
 
         $msg = sprintf(
-            PHP_EOL . PHP_EOL .  'Added: %d rows' . PHP_EOL, 
+            PHP_EOL . PHP_EOL .  'Added: %d rows to imis_raw' . PHP_EOL, 
             $rowCount
         );
 
-        Log::info($msg);
+        //Log::info($msg);
+        $this->log->info($msg);
         $this->info($msg);
     }
 
@@ -74,9 +104,11 @@ class RefreshPhysicians extends Command
 
         if (!$created) {
             $this->error('Could not create temporary location table.'.PHP_EOL);
+            $this->log->error('Could not create temporary location table.'.PHP_EOL);
             die();
         } else {
             $this->info('Created temporary location table'.PHP_EOL); 
+            $this->log->info('Created temporary location table'.PHP_EOL); 
         }
 
     }
@@ -87,9 +119,11 @@ class RefreshPhysicians extends Command
 
         if (!$populated) {
             $this->error('Could not populate temporary location table' . PHP_EOL);
+            $this->log->error('Could not populate temporary location table' . PHP_EOL);
             die();
         } else {
             $this->info('Successfully populated temporary location table' . PHP_EOL);
+            $this->log->info('Successfully populated temporary location table' . PHP_EOL);
         }
     }
     
@@ -98,6 +132,7 @@ class RefreshPhysicians extends Command
         
         $backedUp = RefreshFromImis::backupPhysiciansTable();
         $this->info('Backed up physicians table.' . PHP_EOL);
+        $this->log->info('Backed up physicians table.' . PHP_EOL);
 
         if ($backedUp) {
 
@@ -105,17 +140,20 @@ class RefreshPhysicians extends Command
 
             RefreshFromImis::truncatePhysiciansTable();
             $this->info('Truncated physicians table.' . PHP_EOL);
+            $this->log->info('Truncated physicians table.' . PHP_EOL);
 
             $this->info('Creating physician models ... ' . PHP_EOL);
+            $this->log->info('Creating physician models ... ' . PHP_EOL);
 
             $bar = $this->output->createProgressBar(count($rows));
             if ($rows) {
                 foreach ($rows as $row) {
-                    $created = RefreshFromImis::createPhysicianModel($row);
+                    $created = RefreshFromImis::createPhysicianModel($row, $this->log);
                     $bar->advance();
                 }
             } else {
                 $this->error('Count not create physician models.');
+                $this->log->error('Count not create physician models.');
                 die();
             }
 
@@ -124,9 +162,11 @@ class RefreshPhysicians extends Command
             $bar->finish();
 
             $this->info(PHP_EOL . PHP_EOL . 'Finished!' . PHP_EOL);
+            $this->log->info(PHP_EOL . PHP_EOL . 'Finished!' . PHP_EOL);
 
         } else {
             $this->error('Could not back up physicians table' . PHP_EOL) ;
+            $this->log->error('Could not back up physicians table' . PHP_EOL) ;
             die();
         }
 
@@ -148,13 +188,17 @@ class RefreshPhysicians extends Command
     private function showPhysiciansToBeAdded()
     {
         $newPhysicians = RefreshFromImis::getPhysiciansToBeAdded();
-        $this->info(
-            PHP_EOL . 
-            sprintf('%d new physicians:', count($newPhysicians))
-        );
+        $info = sprintf('%d new physicians:', count($newPhysicians));
+        $this->info(PHP_EOL . $info);
+        $this->log->info($info . PHP_EOL);
+
+        $new = array_map(function($item) {
+            return $item->full_name;
+        }, $newPhysicians);
 
         foreach ($newPhysicians as $name) {
             $this->info("\t" . $name->full_name);
+            $this->log->info("\t$name->full_name");
         }
 
         $this->info(PHP_EOL);
@@ -163,13 +207,17 @@ class RefreshPhysicians extends Command
     private function showPhysiciansToBeRemoved()
     {
         $removedPhysicians = RefreshFromImis::getPhysiciansToBeRemoved();
-        $this->info(
-            PHP_EOL .  
-            sprintf('%d physicians to be removed:', count($removedPhysicians))
-        );
+        $info = sprintf('%d physicians to be removed:', count($removedPhysicians));
+        $this->info(PHP_EOL . $info);
+        $this->log->info($info . PHP_EOL);
+
+        $removed = array_map(function($item) {
+            return $item->full_name;
+        }, $removedPhysicians);
 
         foreach ($removedPhysicians as $name) {
             $this->info("\t" . $name->full_name);
+            $this->log->info("\t$name->full_name");
         }
 
         $this->info(PHP_EOL);
@@ -206,7 +254,7 @@ class RefreshPhysicians extends Command
             return;
         }
         
-        $this->refreshImisTable();
+        //$this->refreshImisTable();
         $this->showPhysiciansToBeAdded();
         $this->showPhysiciansToBeRemoved();
         $this->createTempTable();
