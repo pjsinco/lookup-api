@@ -254,7 +254,7 @@ class RefreshPhysicians extends Command
             return;
         }
         
-        //$this->refreshImisTable();
+        $this->refreshImisTable();
         $this->showPhysiciansToBeAdded();
         $this->showPhysiciansToBeRemoved();
         $this->createTempTable();
