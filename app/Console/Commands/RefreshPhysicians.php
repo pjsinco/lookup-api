@@ -18,7 +18,11 @@ class RefreshPhysicians extends Command
      *
      * @var string
      */
-    protected $signature = 'physicians:refresh {--frombackup} {--imistableonly}';
+    protected $signature = 
+        'physicians:refresh 
+            {--frombackup} 
+            {--imistableonly} 
+            {--makesafetybackup}';
 
     /**
      * The console command description.
@@ -130,7 +134,7 @@ class RefreshPhysicians extends Command
     private function createPhysicianModels()
     {
         
-        $backedUp = RefreshFromImis::backupPhysiciansTable();
+        $backedUp = RefreshFromImis::backupPhysiciansTable('physicians_backup');
         $this->info('Backed up physicians table.' . PHP_EOL);
         $this->log->info('Backed up physicians table.' . PHP_EOL);
 
@@ -252,7 +256,19 @@ class RefreshPhysicians extends Command
         } else if ($this->option('imistableonly')) {
             $this->refreshImisTable();
             return;
+        } else if ($this->option('makesafetybackup')) {
+            $tableName = 'physicians_safety_backup';
+            $backedUp = RefreshFromImis::backupPhysiciansTable($tableName);
+            
+            if ($backedUp) {
+                $this->info('Made safety backup of physicians table: ' . $tableName);
+            } else {
+                $this->error('Could not make safety backup of physicians table.');
+            }
+            
+            return;
         }
+        
         
         $this->refreshImisTable();
         $this->showPhysiciansToBeAdded();

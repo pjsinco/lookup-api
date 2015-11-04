@@ -14,7 +14,6 @@ use Monolog\Logger;
  */
 class RefreshFromImis
 {
-
     private static $tempLocationTable = 'temp_locations';
 
     /**
@@ -202,16 +201,14 @@ class RefreshFromImis
         DB::table('physicians')->truncate();
     }
 
-    public static function backupPhysiciansTable()
+    public static function backupPhysiciansTable($backupTableName)
     {
 
-        $backup = 'physicians_backup';
-
-        if (Schema::hasTable($backup)) {
-            Schema::drop($backup);
+        if (Schema::hasTable($backupTableName)) {
+            Schema::drop($backupTableName);
         }
 
-        Schema::create($backup, function (Blueprint $table) {
+        Schema::create($backupTableName, function (Blueprint $table) {
             $table->timestamps();
             $table->increments('id');
             $table->string('aoa_mem_id', 16);
@@ -257,7 +254,7 @@ class RefreshFromImis
         });
 
         $q = "
-            insert into $backup
+            insert into $backupTableName
                 select * from physicians
         ";
 
