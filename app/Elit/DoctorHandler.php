@@ -17,7 +17,6 @@ class DoctorHandler
 
     public static function hasDoctor($string)
     {
-
         $trimmed = trim($string);
 
         foreach (self::$forms as $form) {
@@ -37,7 +36,7 @@ class DoctorHandler
             self::hasDoctor($trimmed)) {
 
             foreach (self::$forms as $form) {
-                $replaced = preg_replace("/^$form /i", '', $trimmed);
+                $replaced = preg_replace("/^$form +/i", '', $trimmed);
                 if ($replaced !== $trimmed) {
                     return $replaced;
                 }
