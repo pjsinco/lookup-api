@@ -224,16 +224,16 @@ class PhysicianController extends Controller
         $sort = $request->has('sort') ? $request->sort : 'asc';
         $limit = $request->has('per_page') ? $request->per_page : '25';
 
-        $normalizedName = DoctorHandler::normalize($request->q);
+        $request->q = DoctorHandler::normalize($request->q);
 
         $physicians = Physician::withinRadius(
             $request->lat, 
             $request->lon, 
             $distance
         )
-        ->where('last_name', 'like', $normalizedName . '%' )
-        ->orWhere('first_name', 'like', $$normalizedName . '%' )
-        ->orWhere('PrimaryPracticeFocusArea', 'like', $normalizedName . '%' )
+        ->where('last_name', 'like', $request->q . '%' )
+        ->orWhere('first_name', 'like', $request->q . '%' )
+        ->orWhere('PrimaryPracticeFocusArea', 'like', $request->q . '%' )
         ->orderBy($orderBy, $sort)
         ->paginate($limit);
 
