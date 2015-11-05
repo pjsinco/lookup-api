@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Transformers\PhysicianTransformer;
+use Elit\DoctorHandler;
 use DB;
 use App\Physician;
 use App\Specialty;
 use League\Fractal;
 use League\Fractal\Manager;
 use EllipseSynergie\ApiResponse\Contracts\Response;
+
 
 
 class PhysicianController extends Controller
@@ -222,14 +224,16 @@ class PhysicianController extends Controller
         $sort = $request->has('sort') ? $request->sort : 'asc';
         $limit = $request->has('per_page') ? $request->per_page : '25';
 
+        $normalizedName = DoctorHandler::normalize($request->q);
+
         $physicians = Physician::withinRadius(
             $request->lat, 
             $request->lon, 
             $distance
         )
-        ->where('last_name', 'like', $request->q . '%' )
-        ->orWhere('first_name', 'like', $request->q . '%' )
-        ->orWhere('PrimaryPracticeFocusArea', 'like', $request->q . '%' )
+        ->where('last_name', 'like', $normalizedName . '%' )
+        ->orWhere('first_name', 'like', $$normalizedName . '%' )
+        ->orWhere('PrimaryPracticeFocusArea', 'like', $normalizedName . '%' )
         ->orderBy($orderBy, $sort)
         ->paginate($limit);
 
