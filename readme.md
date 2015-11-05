@@ -137,3 +137,12 @@ lines
     5. Run the migration on production
 
 * SO: [Script to trim 7 columns to 5 ( csv file )](http://stackoverflow.com/questions/9814272/script-to-trim-7-columns-to-5-csv-file)
+
+#####Thu Nov  5 10:38:49 2015 CST
+* Query to get column names:
+```sql
+select `COLUMN_NAME`
+from `INFORMATION_SCHEMA`.`COLUMNS`
+where `table_schema` = 'findyourdo'
+    and `table_name` = 'physicians'
+```
