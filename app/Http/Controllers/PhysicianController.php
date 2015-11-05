@@ -143,11 +143,6 @@ class PhysicianController extends Controller
         $searchDistance = $request->distance ? $request->distance : $distance;
         //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
 
-//        $physicians = Physician::select(DB::raw($haversineSelectStmt))
-//            ->whereIn('PrimaryPracticeFocusCode', $subspecialties )
-//            ->having('distance', '<', $searchDistance)
-//            ->orderBy('distance', 'asc')
-//            ->get();
 
         $physicians = Physician::withinRadius(
             $request->lat, 
@@ -181,11 +176,6 @@ class PhysicianController extends Controller
         $searchDistance = $request->distance ? $request->distance : $distance;
         //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
 
-//        $physicians = Physician::select(DB::raw($haversineSelectStmt))
-//            ->where('PrimaryPracticeFocusCode', '=', $specialty->code )
-//            ->having('distance', '<', $searchDistance)
-//            ->orderBy('distance', 'asc')
-//            ->get();
 
          $physicians = Physician::withinRadius(
              $request->lat, 
@@ -228,20 +218,11 @@ class PhysicianController extends Controller
      */
     private function searchWithQuery(Request $request, $distance)
     {
-        //$searchDistance = $request->distance ? $request->distance : $distance;
-        //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
-
-//        $physicians = Physician::select(DB::raw($haversineSelectStmt))
-//            ->where('last_name', 'like', $request->q . '%' )
-//            ->orWhere('first_name', 'like', $request->q . '%' )
-//            ->orWhere('PrimaryPracticeFocusArea', 'like', $request->q . '%' )
-//            ->having('distance', '<', $distance)
-//            ->orderBy('distance', 'asc')
-//            ->get();
-
         $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
         $sort = $request->has('sort') ? $request->sort : 'asc';
         $limit = $request->has('per_page') ? $request->per_page : '25';
+
+        $normalizedQuery = $this->normalizeQuery($request->q)
 
 
         $physicians = Physician::withinRadius(
@@ -320,12 +301,6 @@ class PhysicianController extends Controller
     public function nameSearch(Request $request)
     {
 
-//        $haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
-//        $physicians = Physician::select(DB::raw($haversineSelectStmt))
-//            ->where('last_name', 'like', $request->name . '%')
-//            ->orWhere('first_name', 'like', $request->name . '%')
-//            ->having('distance', '<', $this->defaultDistance)
-//            ->get();
 
         $physicians = Physician::withinRadius(
             $request->lat, 
@@ -407,12 +382,6 @@ class PhysicianController extends Controller
                         //$this->haversineSelect($request->lat, $request->lon);
 
                     // General search
-//                    $physicians = Physician::select(DB::raw($haversineSelectStmt))
-//                        ->where('last_name', 'like', $request->name . '%')
-//                        ->orWhere('first_name', 'like', $request->name . '%')
-//                        ->having('distance', '<', $searchDistance)
-//                        ->orderBy('distance', 'asc')
-//                        ->get();
                         $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
                         $sort = $request->has('sort') ? $request->sort : 'asc';
                         $limit = $request->has('per_page') ? $request->per_page : '25';
@@ -450,13 +419,6 @@ class PhysicianController extends Controller
                     //$this->haversineSelect($request->lat, $request->lon);
 
                 // General search, with distance
-//                $physicians = Physician::select(DB::raw($haversineSelectStmt))
-//                    ->where('last_name', 'like', $request->name . '%')
-//                    ->orWhere('first_name', 'like', $request->name . '%')
-//                    ->having('distance', '<', $request->distance)
-//                    ->orderBy('distance', 'asc')
-//                    ->get();
-
                 $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
                 $sort = $request->has('sort') ? $request->sort : 'asc';
                 $limit = $request->has('per_page') ? $request->per_page : '25';
@@ -556,5 +518,4 @@ class PhysicianController extends Controller
         
         return !empty($result);
     }
-
 }
