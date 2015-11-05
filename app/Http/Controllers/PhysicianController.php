@@ -222,9 +222,6 @@ class PhysicianController extends Controller
         $sort = $request->has('sort') ? $request->sort : 'asc';
         $limit = $request->has('per_page') ? $request->per_page : '25';
 
-        $normalizedQuery = $this->normalizeQuery($request->q)
-
-
         $physicians = Physician::withinRadius(
             $request->lat, 
             $request->lon, 
