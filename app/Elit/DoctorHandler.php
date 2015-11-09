@@ -28,7 +28,7 @@ class DoctorHandler
         return false;
     }
 
-    public static function normalize($string)
+    public static function stripDoctor($string)
     {
         $trimmed = trim($string);
 

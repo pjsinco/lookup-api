@@ -7,6 +7,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Transformers\PhysicianTransformer;
 use Elit\DoctorHandler;
+use Elit\SearchHelper;
 use DB;
 use App\Physician;
 use App\Specialty;
@@ -210,6 +211,10 @@ class PhysicianController extends Controller
     
         return $physicians;
     }
+    
+    private function searchWithFirstAndLastName(Request $request) {
+        $nameArray = SearchHelper::getAsTwoWordArray($urldecode($request->q));
+    }
 
     /**
      * Search for physicians by first name, last name or specialty
@@ -224,19 +229,34 @@ class PhysicianController extends Controller
         $sort = $request->has('sort') ? $request->sort : 'asc';
         $limit = $request->has('per_page') ? $request->per_page : '25';
 
-        // Strip out forms of 'Dr.'
-        $normalizedQuery = DoctorHandler::normalize(urldecode($request->q));
+        // Remove forms of "dr." from the beginning of the query
+        $stripped = DoctorHandler::stripDoctor(urldecode($request->q));
 
-        $physicians = Physician::withinRadius(
-            $request->lat, 
-            $request->lon, 
-            $distance
-        )
-        ->where('last_name', 'like', $normalizedQuery . '%' )
-        ->orWhere('first_name', 'like', $normalizedQuery . '%' )
-        ->orWhere('PrimaryPracticeFocusArea', 'like', $request->q . '%' )
-        ->orderBy($orderBy, $sort)
-        ->paginate($limit);
+        if (SearchHelper::hasTwoWords($stripped)) {
+            // Perform a first_name, last_name search ...
+            $nameArray = SearchHelper::getAsTwoWordArray($stripped);
+            $physicians = Physician::withinRadius(
+                $request->lat, 
+                $request->lon, 
+                $distance
+            )
+            ->where('first_name', 'like', $nameArray[0] . '%' )
+            ->where('last_name', 'like', $nameArray[1] . '%' )
+            ->orderBy($orderBy, $sort)
+            ->paginate($limit);
+        } else {
+            // Otherwise try to match on first_name, last_name or specialty
+            $physicians = Physician::withinRadius(
+                $request->lat, 
+                $request->lon, 
+                $distance
+            )
+            ->where('last_name', 'like', $stripped . '%' )
+            ->orWhere('first_name', 'like', $stripped . '%' )
+            ->orWhere('PrimaryPracticeFocusArea', 'like', $request->q . '%' )
+            ->orderBy($orderBy, $sort)
+            ->paginate($limit);
+        }
 
         return $physicians;
     }
@@ -295,15 +315,13 @@ class PhysicianController extends Controller
     }
 
     /**
-     * Fuzzy search for a physician by the beginning of first name or last name
+     * Fuzzy-ish search for a physician by the beginning of first name or last name
      *
      * @param Request - the request
      * @return json
      */
     public function nameSearch(Request $request)
     {
-
-
         $physicians = Physician::withinRadius(
             $request->lat, 
             $request->lon, 
@@ -342,7 +360,6 @@ class PhysicianController extends Controller
             ]
         ]; 
         return $this->response->withArray($errorMeta);
-
     }
 
     public function search(Request $request)

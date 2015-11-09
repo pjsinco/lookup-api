@@ -70,15 +70,6 @@ class Physician extends Model
         $haversineSelect .= ") ) + sin( radians(" . $lat . ") ) ";
         $haversineSelect .= "* sin( radians( lat ) ) ) ) AS distance";
 
-//        $haversine = sprintf(
-//            '*, (%f * DEGREES(ACOS(COS(RADIANS(%f)) * COS(RADIANS(lat)) * '.
-//            'COS(RADIANS(%f - lng)) + SIN(RADIANS(%f)) * ' .
-//            'SIN(RADIANS(lat))))) AS distance',
-//            $distanceUnit,
-//            $lat,
-//            $lon,
-//            $lat
-//        );
 
         $subselect = clone $query;
         $subselect->selectRaw(DB::raw($haversineSelect));
@@ -100,7 +91,6 @@ class Physician extends Model
         $query
             ->from(DB::raw('(' . $subselect->toSql() . ') as d'))
             ->where('distance', '<=', $radius);
-
     }
 }
 

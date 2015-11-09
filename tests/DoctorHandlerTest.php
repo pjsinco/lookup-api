@@ -93,7 +93,7 @@ class TestDoctorHandle extends PHPUnit_Framework_TestCase
         ];
 
         foreach ($strings as $string) {
-            $this->assertEquals(DoctorHandler::normalize($string), 'smith');
+            $this->assertEquals(DoctorHandler::stripDoctor($string), 'smith');
         }
     }
 }
