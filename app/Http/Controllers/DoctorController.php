@@ -474,12 +474,6 @@ class DoctorController extends Controller
                 null,
                 $queryMeta
             );
-            //return $this->response(
-            //    $physicians, 
-            //    new PhysicianTransformer,
-            //    null,
-            //    $queryMeta
-            //);
         } 
     
         $errorMeta = [
