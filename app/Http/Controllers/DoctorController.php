@@ -11,6 +11,7 @@ use Elit\SearchHelper;
 use DB;
 use App\Physician;
 use App\Specialty;
+use App\Location;
 use League\Fractal;
 use League\Fractal\Manager;
 use EllipseSynergie\ApiResponse\Contracts\Response;
@@ -147,9 +148,11 @@ class DoctorController extends Controller
         //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
 
 
+        $coords = $this->getCoordinatesFromZip($request->zip);
+
         $physicians = Physician::withinRadius(
-            $request->lat, 
-            $request->lon, 
+            $coords['lat'], 
+            $coords['lon'], 
             $searchDistance
         )
             ->whereIn('PrimaryPracticeFocusCode', $subspecialties )
@@ -179,10 +182,10 @@ class DoctorController extends Controller
         $searchDistance = $request->distance ? $request->distance : $distance;
         //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
 
-
-         $physicians = Physician::withinRadius(
-             $request->lat, 
-             $request->lon, 
+        $coords = $this->getCoordinatesFromZip($request->zip);
+        $physicians = Physician::withinRadius(
+             $coords['lat'], 
+             $coords['lon'], 
              $searchDistance
          )
          ->where('PrimaryPracticeFocusCode', '=', $specialty->code )
@@ -235,9 +238,11 @@ class DoctorController extends Controller
         if (SearchHelper::hasTwoWords($stripped)) {
             // Perform a first_name, last_name search ...
             $nameArray = SearchHelper::getAsTwoWordArray($stripped);
+  
+            $coords = $this->getCoordinatesFromZip($request->zip);
             $physicians = Physician::withinRadius(
-                $request->lat, 
-                $request->lon, 
+                $coords['lat'], 
+                $coords['lon'], 
                 $distance
             )
             ->where('first_name', 'like', $nameArray[0] . '%' )
@@ -246,9 +251,10 @@ class DoctorController extends Controller
             ->get();
         } else {
             // Otherwise try to match on first_name, last_name or specialty
+            $coords = $this->getCoordinatesFromZip($request->zip);
             $physicians = Physician::withinRadius(
-                $request->lat, 
-                $request->lon, 
+                $coords['lat'], 
+                $coords['lon'], 
                 $distance
             )
             ->where('last_name', 'like', $stripped . '%' )
@@ -259,6 +265,15 @@ class DoctorController extends Controller
         }
 
         return $physicians;
+    }
+
+    public function getCoordinatesFromZip($zip)
+    {
+        $location = Location::where('zip', '=', $zip)
+            ->get();
+        $coords['lat'] = $location[0]->lat;
+        $coords['lon'] = $location[0]->lon;
+        return $coords;
     }
 
     /**
@@ -275,10 +290,7 @@ class DoctorController extends Controller
             app()->abort(404);
         }
 
-        $location = Location::where('zip', '=', $request->zip)
-            ->get();
-        $lat = $location[0]->lat;
-        $lon = $location[0]->lon;
+
         //$haversineSelectStmt = 
             //$this->haversineSelect($lat, $lon);
 
@@ -286,7 +298,12 @@ class DoctorController extends Controller
             //->having('distance', '<', $request->miles)
             //->orderBy('distance', 'asc')
             //->get();
-        $physicians = Physician::withinRadius($lat, $lon, $searchDistance)
+        $coords = $this->getCoordinatesFromZip($request->zip);
+        $physicians = Physician::withinRadius(
+            $coords['lat'], 
+            $coords['lon'], 
+            $searchDistance
+        )
             ->orderBy('distance', 'asc')
             ->get();
 
@@ -323,8 +340,8 @@ class DoctorController extends Controller
     public function nameSearch(Request $request)
     {
         $physicians = Physician::withinRadius(
-            $request->lat, 
-            $request->lon, 
+            $coords['lat'], 
+            $coords['lon'], 
             $this->defaultDistance
         )
         ->where('last_name', 'like', $request->name . '%')
@@ -405,10 +422,10 @@ class DoctorController extends Controller
                         $sort = $request->has('sort') ? $request->sort : 'asc';
                         $limit = $request->has('per_page') ? $request->per_page : '25';
 
-        
+                        $coords = $this->getCoordinatesFromZip($request->zip);
                         $physicians = Physician::withinRadius(
-                            $request->lat, 
-                            $request->lon, 
+                            $coords['lat'], 
+                            $coords['lon'], 
                             $searchDistance
                         )
                         ->where('last_name', 'like', $request->name . '%')
