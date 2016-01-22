@@ -459,10 +459,10 @@ class DoctorController extends Controller
                 $sort = $request->has('sort') ? $request->sort : 'asc';
                 $limit = $request->has('per_page') ? $request->per_page : '25';
 
-        
+                $coords = $this->getCoordinatesFromZip($request->zip);
                 $physicians = Physician::withinRadius(
-                    $request->lat, 
-                    $request->lon, 
+                    $coords['lat'], 
+                    $coords['lon'], 
                     $searchDistance
                 )
                 ->where('last_name', 'like', $request->name . '%')
