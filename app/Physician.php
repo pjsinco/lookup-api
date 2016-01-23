@@ -60,7 +60,7 @@ class Physician extends Model
 
     //const DISTANCE_UNIT_MILES = 69.0;
 
-    public function scopeWithinRadius($query, $lat, $lon, $radius = 25)
+    public function scopeWithinRadius($query, $lat, $lon, $radius = 25.0)
     {
         $distanceUnit = 69.0;
 

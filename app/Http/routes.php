@@ -17,6 +17,12 @@ Route::group(['prefix' => 'api/v1'], function() {
     Route::get('physicians/{id}', 'PhysicianController@show');
 
     /**
+     * Physicians
+     *
+     */
+    Route::get('doctors/search', 'DoctorController@search');
+
+    /**
      * Specialties
      *
      */
