@@ -319,6 +319,11 @@ class RefreshFromImis
                 ': ' . $gse->getMessage());
             $log->warning('Error geolocating ' . $physician['full_name'] . 
                 ': ' . $gse->getMessage());
+        } catch (Exception $e) {
+            Log::warning('Error geolocating ' . $physician['full_name'] . 
+                ': ' . $e->getMessage());
+            $log->warning('Error geolocating ' . $physician['full_name'] . 
+                ': ' . $e->getMessage());
         }
     }
 
