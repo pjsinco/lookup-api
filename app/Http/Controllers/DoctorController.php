@@ -147,8 +147,7 @@ class DoctorController extends Controller
         $searchDistance = $request->distance ? $request->distance : $distance;
         //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
 
-
-        $coords = $this->getCoordinatesFromZip($request->zip);
+        $coords = $this->getCoordinates($request);
 
         $physicians = Physician::withinRadius(
             $coords['lat'], 
@@ -182,7 +181,7 @@ class DoctorController extends Controller
         $searchDistance = $request->distance ? $request->distance : $distance;
         //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
 
-        $coords = $this->getCoordinatesFromZip($request->zip);
+        $coords = $this->getCoordinates($request);
         $physicians = Physician::withinRadius(
              $coords['lat'], 
              $coords['lon'], 
@@ -239,7 +238,8 @@ class DoctorController extends Controller
             // Perform a first_name, last_name search ...
             $nameArray = SearchHelper::getAsTwoWordArray($stripped);
   
-            $coords = $this->getCoordinatesFromZip($request->zip);
+            $coords = $this->getCoordinates($request);
+
             $physicians = Physician::withinRadius(
                 $coords['lat'], 
                 $coords['lon'], 
@@ -251,7 +251,7 @@ class DoctorController extends Controller
             ->get();
         } else {
             // Otherwise try to match on first_name, last_name or specialty
-            $coords = $this->getCoordinatesFromZip($request->zip);
+            $coords = $this->getCoordinates($request);
             $physicians = Physician::withinRadius(
                 $coords['lat'], 
                 $coords['lon'], 
@@ -267,12 +267,24 @@ class DoctorController extends Controller
         return $physicians;
     }
 
-    public function getCoordinatesFromZip($zip)
-    {
-        $location = Location::where('zip', '=', $zip)
-            ->get();
-        $coords['lat'] = $location[0]->lat;
-        $coords['lon'] = $location[0]->lon;
+    /**
+     * Find coordinates for a location, based on zip or city and state.
+     *
+     */
+    public function getCoordinates(Request $request) {
+        if ($request->has('zip')) {
+          $location = Location::where('zip', '=', $request->zip)
+              ->get();
+          $coords['lat'] = $location[0]->lat;
+          $coords['lon'] = $location[0]->lon;
+          return $coords;
+        }
+
+        $location = Location::where('city', '=', $request->city)
+            ->where('state', '=', $request->state)
+            ->first();
+        $coords['lat'] = $location->lat;
+        $coords['lon'] = $location->lon;
         return $coords;
     }
 
@@ -298,7 +310,8 @@ class DoctorController extends Controller
             //->having('distance', '<', $request->miles)
             //->orderBy('distance', 'asc')
             //->get();
-        $coords = $this->getCoordinatesFromZip($request->zip);
+        $coords = $this->getCoordinates($request);
+
         $physicians = Physician::withinRadius(
             $coords['lat'], 
             $coords['lon'], 
@@ -422,7 +435,7 @@ class DoctorController extends Controller
                         $sort = $request->has('sort') ? $request->sort : 'asc';
                         $limit = $request->has('per_page') ? $request->per_page : '25';
 
-                        $coords = $this->getCoordinatesFromZip($request->zip);
+                        $coords = $this->getCoordinates($request);
                         $physicians = Physician::withinRadius(
                             $coords['lat'], 
                             $coords['lon'], 
@@ -459,7 +472,7 @@ class DoctorController extends Controller
                 $sort = $request->has('sort') ? $request->sort : 'asc';
                 $limit = $request->has('per_page') ? $request->per_page : '25';
 
-                $coords = $this->getCoordinatesFromZip($request->zip);
+                $coords = $this->getCoordinates($request);
                 $physicians = Physician::withinRadius(
                     $coords['lat'], 
                     $coords['lon'], 
