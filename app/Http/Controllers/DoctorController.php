@@ -271,7 +271,8 @@ class DoctorController extends Controller
      * Find coordinates for a location, based on zip or city and state.
      *
      */
-    public function getCoordinates(Request $request) {
+    public function getCoordinates(Request $request) 
+    {
         if ($request->has('zip')) {
           $location = Location::where('zip', '=', $request->zip)
               ->get();
@@ -286,6 +287,13 @@ class DoctorController extends Controller
         $coords['lat'] = $location->lat;
         $coords['lon'] = $location->lon;
         return $coords;
+    }
+  
+    public function getZip($city, $state) 
+    {
+      return Location::where('city', '=', $city)
+        ->where('state', '=', $state)
+        ->first()->zip;
     }
 
     /**
@@ -364,7 +372,8 @@ class DoctorController extends Controller
         $queryMeta = [
             'city' => urldecode($request->city),
             'state' => $request->state,
-            'zip' => $request->zip ? $request->zip : null,
+            'zip' => $request->zip ? 
+              $request->zip : $this->getZip($request->city, $request->state),
             'specialty' => !empty($specialty) ? $specialty->full : null,
             'q' => $request->q,
             'count' => ($physicians ? count($physicians) : 0),
@@ -382,7 +391,7 @@ class DoctorController extends Controller
         } 
     
         $errorMeta = [
-            'meta' => $meta, 
+            'meta' => $queryMeta, 
             'error' => [
                 'code' => 'GEN-NOT-FOUND',
                 'http_code' => 404,
@@ -489,7 +498,8 @@ class DoctorController extends Controller
         $queryMeta = [
             'city' => urldecode($request->city),
             'state' => $request->state,
-            'zip' => $request->zip ? $request->zip : null,
+            'zip' => $request->zip ? 
+              $request->zip : $this->getZip($request->city, $request->state),
             'specialty' => !empty($specialty) ? $specialty->full : null,
             'q' => $request->q,
             'count' => ($physicians ? count($physicians) : 0),
@@ -507,7 +517,7 @@ class DoctorController extends Controller
         } 
     
         $errorMeta = [
-            'meta' => $meta, 
+            'meta' => $queryMeta, 
             'error' => [
                 'code' => 'GEN-NOT-FOUND',
                 'http_code' => 404,
