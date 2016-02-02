@@ -397,24 +397,21 @@ class PhysicianController extends Controller
                 } elseif ($query) {
                     $physicians = $this->searchWithQuery($request, $searchDistance);
                 } else {
-                    //$haversineSelectStmt = 
-                        //$this->haversineSelect($request->lat, $request->lon);
-
                     // General search
-                        $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
-                        $sort = $request->has('sort') ? $request->sort : 'asc';
-                        $limit = $request->has('per_page') ? $request->per_page : '25';
+                    $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
+                    $sort = $request->has('sort') ? $request->sort : 'asc';
+                    $limit = $request->has('per_page') ? $request->per_page : '25';
 
         
-                        $physicians = Physician::withinRadius(
-                            $request->lat, 
-                            $request->lon, 
-                            $searchDistance
-                        )
-                        ->where('last_name', 'like', $request->name . '%')
-                        ->orWhere('first_name', 'like', $request->name . '%')
-                        ->orderBy($orderBy, $sort)
-                        ->paginate($limit);
+                    $physicians = Physician::withinRadius(
+                        $request->lat, 
+                        $request->lon, 
+                        $searchDistance
+                    )
+                    ->where('last_name', 'like', $request->name . '%')
+                    ->orWhere('first_name', 'like', $request->name . '%')
+                    ->orderBy($orderBy, $sort)
+                    ->paginate($limit);
 
                 }
 
@@ -465,7 +462,6 @@ class PhysicianController extends Controller
             'count' => ($physicians ? count($physicians) : 0),
             'radius' => $searchDistance
         ];
-
         if (!empty($physicians)) {
             return $this->response->withPaginator(
                 $physicians, 
