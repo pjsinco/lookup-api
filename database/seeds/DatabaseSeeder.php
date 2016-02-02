@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call('SpecialtySubspecialtyTableSeeder');
         $this->call('LocationTableSeeder');
         $this->call('PhysicianTableSeeder');
+        $this->call('AliasTableSeeder');
+        $this->call('CreateSpecialtyAliasTableSeeder');
 
         Model::reguard();
     }

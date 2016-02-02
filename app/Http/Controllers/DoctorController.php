@@ -128,6 +128,20 @@ class DoctorController extends Controller
     }
 
     /**
+     * Get all aliases for a specialty.
+     *
+     * @param string $specialtyCode - the parent specialty code (ex.: 'AJI')
+     * @return array of IDs
+     *    ex.: [80, 5, 35]
+     */
+    private function getAliases($specialtyCode)
+    {
+        $aliasIds = DB::Table('specialty_alias')
+          ->addSelect('alias_id')
+          ->where('specialty_id', '=', $specialty)->get();
+    }
+
+    /**
      * Find physicians who practice any of the subspecialties of the 
      * parent specialty.
      *
@@ -205,12 +219,28 @@ class DoctorController extends Controller
     private function searchWithSpecialty(Request $request, 
         Specialty $specialty, $distance)
     {
-        if ($this->isParentSpecialty($specialty)) {
-            $physicians = $this->searchWithParentSpecialty($request, $specialty, $distance);
-        } else {
-            $physicians = $this->searchWithSubspecialty($request, $specialty, $distance);
-        }
     
+        $orderBy = $request->has('order_by') ? $request->order_by : 'distance';
+        $sort = $request->has('sort') ? $request->sort : 'asc';
+        $limit = $request->has('per_page') ? $request->per_page : '25';
+
+        $subspecialties = $this->getSubspecialties($specialty);
+        $searchDistance = $request->distance ? $request->distance : $distance;
+        //$haversineSelectStmt = $this->haversineSelect($request->lat, $request->lon);
+
+        $coords = $this->getCoordinates($request);
+
+        $physicians = Physician::withinRadius(
+            $coords['lat'], 
+            $coords['lon'], 
+            $searchDistance
+        )
+            ->whereIn('PrimaryPracticeFocusCode', $subspecialties )
+            ->orderBy($orderBy, $sort)
+            ->get();
+
+        // Instead of returning an empty Collection, let's return false
+        return $physicians;
         return $physicians;
     }
     
