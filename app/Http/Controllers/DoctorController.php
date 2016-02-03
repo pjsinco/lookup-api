@@ -57,7 +57,7 @@ class DoctorController extends Controller
     // if we don't have anything by our max distance, we'll return 0.
     if (!$request->has('distance')) {
       //while (empty($physicians) || $physicians->isEmpty()) {
-      while (!$physicians) {
+      while (!$physicians || $physicians->count() == 0) {
         $searchDistance = $this->getNextDistance($searchDistance);
   
         $physicians = Physician::withinRadius(
@@ -72,6 +72,7 @@ class DoctorController extends Controller
         if ($searchDistance == $this->maxDistance) {
           break;
         } 
+
       }
     } else {
 
