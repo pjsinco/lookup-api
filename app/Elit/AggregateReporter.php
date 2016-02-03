@@ -20,6 +20,10 @@ class AggregateReporter
       'nearest' => $nearest, 
       'farthest' => $farthest, 
       'aliases' => $aliases,
+      'gender' => [ 
+        'm' => $physicians->get()->where('Gender', 'M')->count(),
+        'f' => $physicians->get()->where('Gender', 'F')->count(),
+      ],
     ];
   }
 
