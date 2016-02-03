@@ -1,7 +1,7 @@
 <?php
 
 namespace Elit;
-use Elit\DoctorHandler;
+//use Elit\DoctorHandler;
 
 class SearchHelper
 {

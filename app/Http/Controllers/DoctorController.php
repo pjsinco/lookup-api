@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Transformers\PhysicianTransformer;
 use Elit\DoctorHandler;
 use Elit\SearchHelper;
+use Elit\AggregateReporter;
 use DB;
 use App\Physician;
 use App\Specialty;
@@ -75,7 +76,6 @@ class DoctorController extends Controller
 
       }
     } else {
-
       $physicians = Physician::withinRadius(
           $coords['lat'], 
           $coords['lon'], 
@@ -92,7 +92,7 @@ class DoctorController extends Controller
       'zip' => $request->zip ? 
         $request->zip : $this->getZip($request->city, $request->state),
       'alias_id' => $request->alias_id ? $request->alias_id : null,
-      'aggregate' => [ 'hello' => 'there', 'how' => 'are', 'you' => '?'],
+      'aggregate' => AggregateReporter::report($physicians, $request->alias_id),
       'q' => $request->q,
       'count' => ($physicians ? $physicians->count() : 0),
       'radius' => $searchDistance
