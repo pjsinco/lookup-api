@@ -132,20 +132,20 @@ class DoctorController extends Controller
     {
       $physician = Physician::find($id);
 
-      if ($physician) {
+      //if ($physician) {
         return $this->response
           ->withItem($physician, new PhysicianTransformer);
-      }
+      //}
 
-      $errorMeta = [
-        'error' => [
-          'code' => 'GEN-NOT-FOUND',
-        'http_code' => 404,
-        'message' => 'Physician not found'
-        ]
-      ]; 
+//      $errorMeta = [
+//        'error' => [
+//          'code' => 'GEN-NOT-FOUND',
+//        'http_code' => 404,
+//        'message' => 'Physician not found'
+//        ]
+//      ]; 
 
-        return $this->response->withArray($errorMeta);
+        //return $this->response->withArray($errorMeta);
 
         //$resource = new Fractal\Resource\Item($phys, new PhysicianTransformer);
         //$output = $this->manager->createData($resource)->toArray();
