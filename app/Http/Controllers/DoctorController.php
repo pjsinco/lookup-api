@@ -86,12 +86,15 @@ class DoctorController extends Controller
         ->gender($request->gender);
     }
 
+    $alias = Alias::find($request->alias_id);
+
     $queryMeta = [
       'city' => urldecode($request->city),
       'state' => $request->state,
       'zip' => $request->zip ? 
         $request->zip : $this->getZip($request->city, $request->state),
-      'alias_id' => $request->alias_id ? $request->alias_id : null,
+      //'alias_id' => $request->alias_id ? $request->alias_id : null,
+      'alias_id' => $alias ? $alias->alias : null,
       'aggregate' => AggregateReporter::report($physicians, $request->alias_id),
       'q' => $request->q,
       'count' => ($physicians ? $physicians->count() : 0),
