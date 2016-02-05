@@ -98,7 +98,7 @@ class DoctorController extends Controller
       'radius' => $searchDistance
     ];
 
-    if (!$physicians->get()->isEmpty()) {
+    //if (!$physicians->get()->isEmpty()) {
       $physicians = $physicians->orderBy($orderBy, $sort)
         ->paginate($limit)
         ->appends($request->query());
@@ -109,17 +109,17 @@ class DoctorController extends Controller
           null,
           $queryMeta
           );
-    } 
+    //} 
 
-    $errorMeta = [
-      'meta' => $queryMeta, 
-      'error' => [
-        'code' => 'GEN-NOT-FOUND',
-      'http_code' => 404,
-      'message' => 'Physician not found'
-      ]
-    ]; 
-      return $this->response->withArray($errorMeta);
+//    $errorMeta = [
+//      'meta' => $queryMeta, 
+//      'error' => [
+//        'code' => 'GEN-NOT-FOUND',
+//      'http_code' => 404,
+//      'message' => 'Physician not found'
+//      ]
+//    ]; 
+//      return $this->response->withArray($errorMeta);
     }
 
     /**
