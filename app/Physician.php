@@ -77,20 +77,24 @@ class Physician extends Model
     $subselect = clone $query;
     $subselect->selectRaw(DB::raw($haversineSelect));
 
-    $latDistance = $radius / $distanceUnit;
-    $latNorthBoundary = $lat - $latDistance;
-    $latSouthBoundary = $lat + $latDistance;
-    $subselect->whereRaw(
-      sprintf('lat between %f and %f', $latNorthBoundary, $latSouthBoundary)
-    );
+//    $latDistance = $radius / $distanceUnit;
+//    $latNorthBoundary = $lat - $latDistance;
+//    $latSouthBoundary = $lat + $latDistance;
+//    $subselect->whereRaw(
+//      sprintf('lat between %f and %f', $latNorthBoundary, $latSouthBoundary)
+//    );
+//
+//    $lonDistance = $radius / $distanceUnit;
+//    $lonEastBoundary = $lon - $lonDistance;
+//    $lonWestBoundary = $lon + $lonDistance;
+//    $subselect->whereRaw(
+//      sprintf('lon between %f and %f', $lonEastBoundary, $lonWestBoundary)
+//    );
 
-    $lonDistance = $radius / $distanceUnit;
-    $lonEastBoundary = $lon - $lonDistance;
-    $lonWestBoundary = $lon + $lonDistance;
-    $subselect->whereRaw(
-      sprintf('lon between %f and %f', $lonEastBoundary, $lonWestBoundary)
-    );
-
+//dd(    $query
+//      ->from(DB::raw('(' . $subselect->toSql() . ') as d'))
+//      ->where('distance', '<=', $radius)
+//      ->toSql());
     return $query
       ->from(DB::raw('(' . $subselect->toSql() . ') as d'))
       ->where('distance', '<=', $radius);
