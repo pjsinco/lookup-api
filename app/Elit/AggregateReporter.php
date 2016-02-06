@@ -40,7 +40,7 @@ class AggregateReporter
         '=',
         'aliases.id' 
       )
-      ->select('aliases.alias')
+      //->select('aliases.alias')
       ->where('specialty_alias.specialty_id', '=', $specialtyCode)
       ->get();
 
@@ -53,6 +53,7 @@ class AggregateReporter
       $alias = Alias::find($requestedAliasId);
       return [
         [ 
+          'id' => $alias->id, 
           'alias' => $alias->alias, 
           'count' => $physicians->count(),
         ],
@@ -70,6 +71,7 @@ class AggregateReporter
           $all[$alias->alias]['count'] = $newCount;
         } else {
           $all[$alias->alias] = [
+            'id' => $alias->id, 
             'alias' => $alias->alias,
             'count' => 1
           ];
