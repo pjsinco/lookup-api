@@ -94,9 +94,8 @@ class DoctorController extends Controller
       'zip' => $request->zip ? 
         $request->zip : $this->getZip($request->city, $request->state),
       //'alias_id' => $request->alias_id ? $request->alias_id : null,
-      //'alias_id' => $alias ? $alias->alias : null,
-      'alias_id' => $alias ? $alias->alias_id : null,
-      'alias' => $alias ? $alias->alias : null,
+      'alias_id' => $alias ? $alias->alias : null,
+      //'alias' => $alias ? $alias->alias : null,
       'aggregate' => AggregateReporter::report($physicians, $request->alias_id),
       'q' => $request->q,
       'count' => ($physicians ? $physicians->count() : 0),
