@@ -128,7 +128,7 @@ class Physician extends Model
       return $query->where(function($query) use ($nameArray) {
         $query
           ->where('first_name', 'like', $nameArray[0] . '%' )
-          ->orWhere('last_name', 'like', $nameArray[1] . '%' );
+          ->Where('last_name', 'like', $nameArray[1] . '%' );
       });
     } else {
       return $query->where(function($query) use ($stripped) {
