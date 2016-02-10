@@ -62,6 +62,24 @@ class Physician extends Model
   ];
 
   //const DISTANCE_UNIT_MILES = 69.0;
+  public function scopeWithinDistance($query, $lat, $lon, $radius = 25.0)
+  {
+    $distanceUnit = 69.0;
+
+    $haversineSelect  = "*, (3959 * acos( cos( radians(" . $lat;
+    $haversineSelect .= ") ) * cos( radians( lat ) ) * ";
+    $haversineSelect .= "cos( radians( lon ) - radians(" . $lon;
+    $haversineSelect .= ") ) + sin( radians(" . $lat . ") ) ";
+    $haversineSelect .= "* sin( radians( lat ) ) ) ) AS distance";
+
+
+    $subselect = clone $query;
+    $subselect->selectRaw(DB::raw($haversineSelect));
+
+    return $query
+      ->from(DB::raw('(' . $subselect->toSql() . ') as d'))
+      ->where('distance', '<=', $radius);
+  }
 
   public function scopeWithinRadius($query, $lat, $lon, $radius = 25.0)
   {
@@ -77,19 +95,19 @@ class Physician extends Model
     $subselect = clone $query;
     $subselect->selectRaw(DB::raw($haversineSelect));
 
-//    $latDistance = $radius / $distanceUnit;
-//    $latNorthBoundary = $lat - $latDistance;
-//    $latSouthBoundary = $lat + $latDistance;
-//    $subselect->whereRaw(
-//      sprintf('lat between %f and %f', $latNorthBoundary, $latSouthBoundary)
-//    );
-//
-//    $lonDistance = $radius / $distanceUnit;
-//    $lonEastBoundary = $lon - $lonDistance;
-//    $lonWestBoundary = $lon + $lonDistance;
-//    $subselect->whereRaw(
-//      sprintf('lon between %f and %f', $lonEastBoundary, $lonWestBoundary)
-//    );
+    $latDistance = $radius / $distanceUnit;
+    $latNorthBoundary = $lat - $latDistance;
+    $latSouthBoundary = $lat + $latDistance;
+    $subselect->whereRaw(
+      sprintf('lat between %f and %f', $latNorthBoundary, $latSouthBoundary)
+    );
+
+    $lonDistance = $radius / $distanceUnit;
+    $lonEastBoundary = $lon - $lonDistance;
+    $lonWestBoundary = $lon + $lonDistance;
+    $subselect->whereRaw(
+      sprintf('lon between %f and %f', $lonEastBoundary, $lonWestBoundary)
+    );
 
 //dd(    $query
 //      ->from(DB::raw('(' . $subselect->toSql() . ') as d'))
