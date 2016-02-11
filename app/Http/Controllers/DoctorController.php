@@ -61,7 +61,7 @@ class DoctorController extends Controller
       while (!$physicians || $physicians->count() == 0) {
         $searchDistance = $this->getNextDistance($searchDistance);
 
-        $physicians = Physician::withinRadius(
+        $physicians = Physician::withinDistance(
             $coords['lat'], 
             $coords['lon'], 
             $searchDistance
@@ -76,7 +76,7 @@ class DoctorController extends Controller
 
       }
     } else {
-      $physicians = Physician::withinRadius(
+      $physicians = Physician::withinDistance(
           $coords['lat'], 
           $coords['lon'], 
           $searchDistance
