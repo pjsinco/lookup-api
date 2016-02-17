@@ -36,7 +36,7 @@ class DoctorController extends Controller
 
   public function __construct(Response $response)
   {
-    $this->response = $response;
+  $this->response = $response;
   }
 
   /**
@@ -57,15 +57,14 @@ class DoctorController extends Controller
     // our fallback distances until we get at least 1 result;
     // if we don't have anything by our max distance, we'll return 0.
     if (!$request->has('distance')) {
-      //while (empty($physicians) || $physicians->isEmpty()) {
       while (!$physicians || $physicians->count() == 0) {
         $searchDistance = $this->getNextDistance($searchDistance);
 
         $physicians = Physician::withinDistance(
-            $coords['lat'], 
-            $coords['lon'], 
-            $searchDistance
-            )
+          $coords['lat'], 
+          $coords['lon'], 
+          $searchDistance
+          )
           ->alias($request->alias_id)
           ->name($request->q) 
           ->gender($request->gender);
@@ -77,14 +76,14 @@ class DoctorController extends Controller
       }
     } else {
       $physicians = Physician::withinDistance(
-          $coords['lat'], 
-          $coords['lon'], 
-          $searchDistance
-          )
-        ->alias($request->alias_id)
-        ->name($request->q) 
-        ->gender($request->gender);
-   }
+        $coords['lat'], 
+        $coords['lon'], 
+        $searchDistance
+        )
+      ->alias($request->alias_id)
+      ->name($request->q) 
+      ->gender($request->gender);
+     }
 
     $alias = Alias::find($request->alias_id);
 
@@ -92,7 +91,7 @@ class DoctorController extends Controller
       'city' => urldecode($request->city),
       'state' => $request->state,
       'zip' => $request->zip ? 
-        $request->zip : $this->getZip($request->city, $request->state),
+      $request->zip : $this->getZip($request->city, $request->state),
       //'alias_id' => $request->alias_id ? $request->alias_id : null,
       'alias' => $alias ? $alias->alias : null,
       'alias_id' => $alias ? $alias->id : null,
@@ -104,141 +103,129 @@ class DoctorController extends Controller
       'sort' => $request->sort,
     ];
 
-    //if (!$physicians->get()->isEmpty()) {
-      $physicians = $physicians->orderBy($orderBy, $sort)
-        ->paginate($limit)
-        ->appends($request->query());
+    $physicians = $physicians->orderBy($orderBy, $sort)
+      ->paginate($limit)
+      ->appends($request->query());
 
-      return $this->response->withPaginator(
-          $physicians,
-          new PhysicianTransformer,
-          null,
-          $queryMeta
-          );
-    //} 
+    return $this->response->withPaginator(
+      $physicians,
+      new PhysicianTransformer,
+      null,
+      $queryMeta
+      );
+  }
+
+  /**
+   * Show a physician
+   *
+   * @return void
+   * @author PJ
+   */
+  public function show($id)
+  {
+    $physician = Physician::find($id);
+
+    //if ($physician) {
+    return $this->response
+      ->withItem($physician, new PhysicianTransformer);
+    //}
 
 //    $errorMeta = [
-//      'meta' => $queryMeta, 
 //      'error' => [
-//        'code' => 'GEN-NOT-FOUND',
+//      'code' => 'GEN-NOT-FOUND',
 //      'http_code' => 404,
 //      'message' => 'Physician not found'
 //      ]
 //    ]; 
-//      return $this->response->withArray($errorMeta);
+
+    //return $this->response->withArray($errorMeta);
+
+    //$resource = new Fractal\Resource\Item($phys, new PhysicianTransformer);
+    //$output = $this->manager->createData($resource)->toArray();
+
+    //return $output;
+
+
+    //return $this->respond([
+    //'data' => $this->physicianTransformer->transform($physician)
+    //]);
+  }
+
+  /**
+   * Get the next distance to try.
+   * Ex.: 33 is passed in, return 50.
+   * Ex.: 100 is passed in, return 250.
+   *
+   * @param int
+   * @return int
+   */
+  private function getNextDistance($queriedDistance = 0)
+  {
+    foreach ($this->fallbackDistances as $distance) {
+    if ($distance > $queriedDistance) {
+      return $distance;
+    }
     }
 
-    /**
-     * Show a physician
-     *
-     * @return void
-     * @author PJ
-     */
-    public function show($id)
-    {
-      $physician = Physician::find($id);
+    // the queriedDistance is already beyond our distances
+    return $queriedDistance;
+  }
 
-      //if ($physician) {
-        return $this->response
-          ->withItem($physician, new PhysicianTransformer);
-      //}
+  /**
+   * Get all aliases for a specialty.
+   *
+   * @param string $specialtyCode - the parent specialty code (ex.: 'AJI')
+   * @return array of IDs
+   *    ex.: [80, 5, 35]
+   */
+  private function getAliases($specialtyCode)
+  {
+    $aliasIds = DB::Table('specialty_alias')
+    ->addSelect('alias_id')
+    ->where('specialty_id', '=', $specialty)->get();
+  }
 
-//      $errorMeta = [
-//        'error' => [
-//          'code' => 'GEN-NOT-FOUND',
-//        'http_code' => 404,
-//        'message' => 'Physician not found'
-//        ]
-//      ]; 
-
-        //return $this->response->withArray($errorMeta);
-
-        //$resource = new Fractal\Resource\Item($phys, new PhysicianTransformer);
-        //$output = $this->manager->createData($resource)->toArray();
-
-        //return $output;
-
-
-        //return $this->respond([
-        //'data' => $this->physicianTransformer->transform($physician)
-        //]);
+  /**
+   * Find coordinates for a location, based on zip or city and state.
+   *
+   */
+  public function getCoordinates(Request $request) 
+  {
+    if ($request->has('zip')) {
+    $location = Location::where('zip', '=', $request->zip)
+      ->get();
+    $coords['lat'] = $location[0]->lat;
+    $coords['lon'] = $location[0]->lon;
+    return $coords;
     }
 
-    /**
-     * Get the next distance to try.
-     * Ex.: 33 is passed in, return 50.
-     * Ex.: 100 is passed in, return 250.
-     *
-     * @param int
-     * @return int
-     */
-    private function getNextDistance($queriedDistance = 0)
-    {
-      foreach ($this->fallbackDistances as $distance) {
-        if ($distance > $queriedDistance) {
-          return $distance;
-        }
-      }
+    $location = Location::where('city', '=', $request->city)
+    ->where('state', '=', $request->state)
+    ->first();
+    $coords['lat'] = $location->lat;
+    $coords['lon'] = $location->lon;
+    return $coords;
+  }
 
-      // the queriedDistance is already beyond our distances
-      return $queriedDistance;
-    }
+  public function getZip($city, $state) 
+  {
+    return Location::where('city', '=', $city)
+    ->where('state', '=', $state)
+    ->first()->zip;
+  }
 
-    /**
-     * Get all aliases for a specialty.
-     *
-     * @param string $specialtyCode - the parent specialty code (ex.: 'AJI')
-     * @return array of IDs
-     *    ex.: [80, 5, 35]
-     */
-    private function getAliases($specialtyCode)
-    {
-      $aliasIds = DB::Table('specialty_alias')
-        ->addSelect('alias_id')
-        ->where('specialty_id', '=', $specialty)->get();
-    }
+  /**
+   * Determine whether a specialty is a parent specialty or a subspecialty.
+   *
+   * @param Specialty
+   * @return boolean
+   */
+  private function isParentSpecialty(Specialty $specialty)
+  {
+    $result = DB::table('specialty_subspecialty')
+    ->where('specialty_id', '=', $specialty->code)
+    ->get();
 
-    /**
-     * Find coordinates for a location, based on zip or city and state.
-     *
-     */
-    public function getCoordinates(Request $request) 
-    {
-      if ($request->has('zip')) {
-        $location = Location::where('zip', '=', $request->zip)
-          ->get();
-        $coords['lat'] = $location[0]->lat;
-        $coords['lon'] = $location[0]->lon;
-        return $coords;
-      }
-
-      $location = Location::where('city', '=', $request->city)
-        ->where('state', '=', $request->state)
-        ->first();
-      $coords['lat'] = $location->lat;
-      $coords['lon'] = $location->lon;
-      return $coords;
-    }
-
-    public function getZip($city, $state) 
-    {
-      return Location::where('city', '=', $city)
-        ->where('state', '=', $state)
-        ->first()->zip;
-    }
-
-    /**
-     * Determine whether a specialty is a parent specialty or a subspecialty.
-     *
-     * @param Specialty
-     * @return boolean
-     */
-    private function isParentSpecialty(Specialty $specialty)
-    {
-      $result = DB::table('specialty_subspecialty')
-        ->where('specialty_id', '=', $specialty->code)
-        ->get();
-
-      return !empty($result);
-    }
+    return !empty($result);
+  }
 }

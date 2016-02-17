@@ -54,6 +54,9 @@ class Physician extends Model
     'geo_city',
     'geo_state',
     'geo_matches',
+    'alias_1',
+    'alias_2',
+    'alias_3',
   ];
 
   public $hidden = [

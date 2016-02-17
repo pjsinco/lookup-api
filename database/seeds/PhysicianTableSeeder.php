@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Elit\AggregateReporter;
 
 class PhysicianTableSeeder extends Seeder
 {
@@ -13,7 +14,7 @@ class PhysicianTableSeeder extends Seeder
     {
         DB::table('physicians')->truncate();
 
-        $physicians = $this->getCsv('physicians-2015-11-05-cut.csv');
+        $physicians = $this->getCsv('physicians-2016-02-17.csv');
         $this->seedTable($physicians);
     }
 
@@ -26,7 +27,9 @@ class PhysicianTableSeeder extends Seeder
     private function seedTable($data)
     {
         foreach ($data as $lineIndex => $row) {
-            //$physician = App\Physician::create([
+
+            $aliases = AggregateReporter::getAliases($row[17]);
+
             DB::table('physicians')->insert([
                 'aoa_mem_id'                 => $row[0],
                 'full_name'                  => $row[1],
@@ -68,6 +71,9 @@ class PhysicianTableSeeder extends Seeder
                 'geo_city'                   => $row[37],
                 'geo_state'                  => $row[38],
                 'geo_matches'                => ($row[39] == 'True' ? 1 : 0),
+                'alias_1'                    => (empty($aliases[0]) ? null : $aliases[0]->id),
+                'alias_2'                    => (empty($aliases[1]) ? null : $aliases[1]->id),
+                'alias_3'                    => (empty($aliases[2]) ? null : $aliases[2]->id),
             ]);
         }
     }

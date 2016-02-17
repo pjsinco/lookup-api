@@ -31,7 +31,7 @@ class AggregateReporter
    * Get aliases for a specialty
    *
    */
-  private static function getAliases($specialtyCode)
+  public static function getAliases($specialtyCode)
   {
     $alias = DB::table('specialty_alias')
       ->join(
@@ -45,6 +45,11 @@ class AggregateReporter
       ->get();
 
     return $alias;
+  }
+
+  private static function countAliasesSmarterly($physicians, $requestedAliasId)
+  {
+
   }
 
   private static function countAliases($physicians, $requestedAliasId)
@@ -61,11 +66,23 @@ class AggregateReporter
     }
 
     $all = [];
-    $physicians = $physicians->get()->toArray();
-    
-    foreach ($physicians as $physician) {
-      $aliases = self::getAliases($physician['PrimaryPracticeFocusCode']);
-      foreach ($aliases as $alias) {
+    $physiciansArray = $physicians->get()->toArray();
+
+    foreach ($physiciansArray as $physician) {
+
+      // start make-believe code
+//      $physAliases = [];
+//      array_push(
+//        $physAliases
+//        $physician['alias_1'], 
+//        $physician['alias_2'], 
+//        $physician['alias_3']
+//      );
+
+      $physAliases = self::getAliases($physician['PrimaryPracticeFocusCode']);
+      // end make-believe code
+
+      foreach ($physAliases as $alias) {
         if (array_key_exists($alias->alias, $all)) {
           $newCount = $all[$alias->alias]['count'] + 1;
           $all[$alias->alias]['count'] = $newCount;

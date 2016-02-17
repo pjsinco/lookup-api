@@ -9,6 +9,7 @@ class Location extends Model
 {
     public $timestamps = false;
 
+    protected $guarded = [];
 
     public static function random()
     {

@@ -55,6 +55,9 @@ class CreatePhysiciansTable extends Migration
             $table->string('geo_city');
             $table->string('geo_state');
             $table->boolean('geo_matches');
+            $table->integer('alias_1')->unsigned()->nullable();
+            $table->integer('alias_2')->unsigned()->nullable();
+            $table->integer('alias_3')->unsigned()->nullable();
         });
     }
 
