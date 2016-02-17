@@ -39,6 +39,12 @@ class RefreshPhysicians extends Command
     private $logName;
 
     /**
+     * Backup table
+     *
+     */
+    private $backupTableName = 'physicians_safety_backup';
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -176,14 +182,25 @@ class RefreshPhysicians extends Command
 
     }
 
-    private function createFromBackup()
+    private function makeBackup($tableName)
+    {
+        $backedUp = RefreshFromImis::backupPhysiciansTable($tableName);
+        
+        if ($backedUp) {
+            $this->info('Made safety backup of physicians table: ' . $tableName);
+        } else {
+            $this->error('Could not make safety backup of physicians table.');
+        }
+    }
+
+    private function createFromBackup($tableName)
     {
 
         RefreshFromImis::truncatePhysiciansTable();
         
         $q = "
             insert into physicians 
-                select * from physicians_backup;
+                select * from $tableName;
         ";
         
         return DB::statement($q);
@@ -236,7 +253,7 @@ class RefreshPhysicians extends Command
     {
         if ($this->option('frombackup')) {
 
-            $result = $this->createFromBackup();
+            $result = $this->createFromBackup($this->backupTableName);
         
             if ($result) {
                 $this->info(
@@ -257,19 +274,11 @@ class RefreshPhysicians extends Command
             $this->refreshImisTable();
             return;
         } else if ($this->option('makesafetybackup')) {
-            $tableName = 'physicians_safety_backup';
-            $backedUp = RefreshFromImis::backupPhysiciansTable($tableName);
-            
-            if ($backedUp) {
-                $this->info('Made safety backup of physicians table: ' . $tableName);
-            } else {
-                $this->error('Could not make safety backup of physicians table.');
-            }
-            
+            $this->makeBackup($this->backupTableName);
             return;
         }
         
-        
+        $this->makeBackup($this->backupTableName);
         $this->refreshImisTable();
         $this->showPhysiciansToBeAdded();
         $this->showPhysiciansToBeRemoved();

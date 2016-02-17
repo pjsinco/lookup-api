@@ -8,6 +8,7 @@ use Log;
 use Schema;
 use Stanley\Geocodio\Client;
 use Monolog\Logger;
+use Elit\AggregateReporter;
 
 /**
  * Update Find Your DO data with data from iMis.
@@ -21,7 +22,7 @@ class RefreshFromImis
      */
     public function __construct()
     {
-        
+
     }
 
     /**
@@ -251,6 +252,9 @@ class RefreshFromImis
             $table->string('geo_city');
             $table->string('geo_state');
             $table->boolean('geo_matches');
+            $table->integer('alias_1')->unsigned()->nullable();
+            $table->integer('alias_2')->unsigned()->nullable();
+            $table->integer('alias_3')->unsigned()->nullable();
         });
 
         $q = "
@@ -360,6 +364,8 @@ class RefreshFromImis
             return;
         }
 
+        $aliases = AggregateReporter::getAliases($row->PrimaryPracticeFocusCode);
+
         $physician = \App\Physician::create([
             'aoa_mem_id'                 => trim($row->id),
             'full_name'                  => trim($row->full_name),
@@ -401,6 +407,9 @@ class RefreshFromImis
             'geo_city'                   => trim($locationData->geo_city),
             'geo_state'                  => trim($locationData->geo_state),
             'geo_matches'                => trim($locationData->geo_matches),
+            'alias_1'                    => empty($aliases[0]) ? null : $aliases[0]->id,
+            'alias_2'                    => empty($aliases[1]) ? null : $aliases[1]->id,
+            'alias_3'                    => empty($aliases[2]) ? null : $aliases[2]->id,
         ]);
 
         return !empty($physician) ? true : false;
