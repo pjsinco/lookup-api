@@ -1,23 +1,35 @@
 # Lookup API
-#####When things aren't working
-```
-php artisan cache:clear 
-composer dump-autoload
-```
 
-#####When we have Github permission problems:
-```
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_rsa 
-```
-
-#####Order of seeding
+###Order of seeding
 1. Locations
 2. Specialties
 3. SpecialtySubspecialty
 4. Aliases
 5. SpecialtyAlias
 6. Physicians
+
+```
+php artisan db:seed --class=LocationTableSeeder
+php artisan db:seed --class=SpecialtyTableSeeder
+php artisan db:seed --class=SpecialtySubspecialtyTableSeeder
+php artisan db:seed --class=AliasTableSeeder
+php artisan db:seed --class=CreateSpecialtyAliasTableSeeder
+php artisan db:seed --class=PhysicianTableSeeder
+```
+
+###When things aren't working
+```
+php artisan cache:clear 
+composer dump-autoload
+```
+
+###When we have Github permission problems on the server:
+```
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa 
+```
+
+### Notes
 
 #####Thu Sep 24 06:38:10 2015 CDT
 * Sitepoint: [Fractal: a Practical Walkthrough](http://www.sitepoint.com/fractal-practical-walkthrough/)

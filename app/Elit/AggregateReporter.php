@@ -71,32 +71,68 @@ class AggregateReporter
     foreach ($physiciansArray as $physician) {
 
       // start make-believe code
-//      $physAliases = [];
-//      array_push(
-//        $physAliases
-//        $physician['alias_1'], 
-//        $physician['alias_2'], 
-//        $physician['alias_3']
-//      );
+      $physAliases = [];
 
-      $physAliases = self::getAliases($physician['PrimaryPracticeFocusCode']);
+      array_push(
+        $physAliases,
+        $physician['alias_1'], 
+        $physician['alias_2'], 
+        $physician['alias_3']
+      );
+
+      //$physAliases = self::getAliases($physician['PrimaryPracticeFocusCode']);
       // end make-believe code
-
+      
       foreach ($physAliases as $alias) {
-        if (array_key_exists($alias->alias, $all)) {
-          $newCount = $all[$alias->alias]['count'] + 1;
-          $all[$alias->alias]['count'] = $newCount;
-        } else {
-          $all[$alias->alias] = [
-            'id' => $alias->id, 
-            'alias' => $alias->alias,
-            'count' => 1
-          ];
+        if (!empty($alias)) {
+          if (array_key_exists($alias, $all)) {
+            $newCount = $all[$alias]['count'] + 1;
+            $all[$alias]['count'] = $newCount;
+          } else {
+            $all[$alias]['count'] = 1;
+            $all[$alias]['id'] = $alias;
+          }
         }
       }
+
+//      foreach ($physAliases as $alias) {
+//        if (array_key_exists($alias->alias, $all)) {
+//          $newCount = $all[$alias->alias]['count'] + 1;
+//          $all[$alias->alias]['count'] = $newCount;
+//        } else {
+//          $all[$alias->alias] = [
+//            'id' => $alias->id, 
+//            'alias' => $alias->alias,
+//            'count' => 1
+//          ];
+//        }
+      //}
     }
 
-    return $all;
+    return self::translateAliases($all);
   }
+
+  /**
+   * Convert array of [[alias_id => count]] items into 
+   * an array suitable for returning in the meta entry.
+   *
+   * @param array
+   * @return array
+   */
+  private static function translateAliases($aliasCounts)
+  {
+    $aliasesForMeta = [];
+    foreach ($aliasCounts as $aliasCount) {
+      $a = Alias::find($aliasCount['id']);
+      $aliasesForMeta[$a->alias] = [
+        'id' => $a->id,
+        'alias' => $a->alias,
+        'count' => $aliasCount['count'],
+      ];
+    }
+
+    return $aliasesForMeta;
+  }
+
   
 }
