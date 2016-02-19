@@ -184,6 +184,13 @@ class RefreshPhysicians extends Command
     private function createFromBackup($tableName)
     {
 
+        $backupRowCount = DB::table($tableName)
+          ->count();
+
+        if ($backupRowCount == 0) {
+          die('Terminated process: Backup table is empty.');
+        }
+
         RefreshFromImis::truncatePhysiciansTable();
         
         $q = "
