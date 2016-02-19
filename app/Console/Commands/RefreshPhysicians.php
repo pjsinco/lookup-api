@@ -67,7 +67,6 @@ class RefreshPhysicians extends Command
             Logger::INFO
         );
 
-        $this->log->info('Starting refresh ...');
     }
 
     private function refreshImisTable()
@@ -83,8 +82,8 @@ class RefreshPhysicians extends Command
         $this->log->info(sprintf('Retrieved %d rows from iMIS', count($rows)));
 
         $bar = $this->output->createProgressBar(count($rows));
-        $this->info('Adding rows to imis_raw' . PHP_EOL);
-        $this->log->info('Adding rows to imis_raw' . PHP_EOL);
+        $this->info('Adding rows to imis_raw ...' . PHP_EOL);
+        $this->log->info('Adding rows to imis_raw ...' . PHP_EOL);
 
         $rowCount = 0;
 
@@ -140,45 +139,33 @@ class RefreshPhysicians extends Command
     private function createPhysicianModels()
     {
         
-        $backedUp = RefreshFromImis::backupPhysiciansTable('physicians_backup');
-        $this->info('Backed up physicians table.' . PHP_EOL);
-        $this->log->info('Backed up physicians table.' . PHP_EOL);
+        $rows = RefreshFromImis::getImisRawRows();
 
-        if ($backedUp) {
+        RefreshFromImis::truncatePhysiciansTable();
+        $this->info('Truncated physicians table.' . PHP_EOL);
+        $this->log->info('Truncated physicians table.' . PHP_EOL);
 
-            $rows = RefreshFromImis::getImisRawRows();
+        $this->info('Creating physician models ... ' . PHP_EOL);
+        $this->log->info('Creating physician models ... ' . PHP_EOL);
 
-            RefreshFromImis::truncatePhysiciansTable();
-            $this->info('Truncated physicians table.' . PHP_EOL);
-            $this->log->info('Truncated physicians table.' . PHP_EOL);
-
-            $this->info('Creating physician models ... ' . PHP_EOL);
-            $this->log->info('Creating physician models ... ' . PHP_EOL);
-
-            $bar = $this->output->createProgressBar(count($rows));
-            if ($rows) {
-                foreach ($rows as $row) {
-                    $created = RefreshFromImis::createPhysicianModel($row, $this->log);
-                    $bar->advance();
-                }
-            } else {
-                $this->error('Count not create physician models.');
-                $this->log->error('Count not create physician models.');
-                die();
+        $bar = $this->output->createProgressBar(count($rows));
+        if ($rows) {
+            foreach ($rows as $row) {
+                $created = RefreshFromImis::createPhysicianModel($row, $this->log);
+                $bar->advance();
             }
-
-            $rows = null; // needed? helps prevent memory leak?
-
-            $bar->finish();
-
-            $this->info(PHP_EOL . PHP_EOL . 'Finished!' . PHP_EOL);
-            $this->log->info(PHP_EOL . PHP_EOL . 'Finished!' . PHP_EOL);
-
         } else {
-            $this->error('Could not back up physicians table' . PHP_EOL) ;
-            $this->log->error('Could not back up physicians table' . PHP_EOL) ;
+            $this->error('Count not create physician models.');
+            $this->log->error('Count not create physician models.');
             die();
         }
+
+        $rows = null; // needed? helps prevent memory leak?
+
+        $bar->finish();
+
+        $this->info(PHP_EOL . PHP_EOL . 'Finished!' . PHP_EOL);
+        $this->log->info(PHP_EOL . PHP_EOL . 'Finished!' . PHP_EOL);
 
     }
 
@@ -190,6 +177,7 @@ class RefreshPhysicians extends Command
             $this->info('Made safety backup of physicians table: ' . $tableName);
         } else {
             $this->error('Could not make safety backup of physicians table.');
+            die("Terminated because we could not back up the physicians table.");
         }
     }
 
@@ -251,6 +239,9 @@ class RefreshPhysicians extends Command
      */
     public function handle()
     {
+        $this->log->info(PHP_EOL . 'Starting refresh ...' . PHP_EOL);
+        $this->info(PHP_EOL . 'Starting refresh ...' . PHP_EOL);
+
         if ($this->option('frombackup')) {
 
             $result = $this->createFromBackup($this->backupTableName);
