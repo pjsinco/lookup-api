@@ -32,6 +32,7 @@ class LocationTableSeeder extends Seeder
                 'state' => $row[2],
                 'lat' => $row[3],
                 'lon' => $row[4],
+                'pop' => $row[5],
             ]);
         }
     }
