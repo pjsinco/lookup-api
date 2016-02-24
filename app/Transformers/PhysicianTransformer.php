@@ -25,6 +25,15 @@ class PhysicianTransformer extends TransformerAbstract
      */
     protected $defaultIncludes = [];
 
+    private function formatUrl($website) {
+      if (empty($website)) {
+        return $website;
+      }
+
+      return strpos($website, 'http') === false ?  
+        'http://' . $website : $website;
+    }
+
     /**
      * Transform Physician instance into a generic array
      *
@@ -51,8 +60,7 @@ class PhysicianTransformer extends TransformerAbstract
             'zip' => $phys['Zip'],
             'phone' => $phys['Phone'],
             //'email' => $phys['Email'],
-            'website' => 
-              strpos($phys['website'], 'http') === false ? 'http://' : $phys['website'],
+            'website' => $this->formatUrl($phys['website']),
             'school' => $phys['COLLEGE_CODE'],
             'grad_year' => $phys['YearOfGraduation'],
             'experience' => $this->convertToExperience($phys['YearOfGraduation']),
