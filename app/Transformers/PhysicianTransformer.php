@@ -51,7 +51,8 @@ class PhysicianTransformer extends TransformerAbstract
             'zip' => $phys['Zip'],
             'phone' => $phys['Phone'],
             //'email' => $phys['Email'],
-            'website' => $phys['website'],
+            'website' => 
+              strpos($phys['website'], 'http') === false ? 'http://' : $phys['website'],
             'school' => $phys['COLLEGE_CODE'],
             'grad_year' => $phys['YearOfGraduation'],
             'experience' => $this->convertToExperience($phys['YearOfGraduation']),
