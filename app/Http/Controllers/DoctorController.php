@@ -97,6 +97,7 @@ class DoctorController extends Controller
       'alias_id' => $alias ? $alias->id : null,
       'aggregate' => AggregateReporter::report($physicians, $request->alias_id),
       'q' => $request->q,
+      'gender' => $request->gender,
       'count' => ($physicians ? $physicians->count() : 0),
       'radius' => $searchDistance,
       'order_by' => $request->order_by,
