@@ -54,16 +54,16 @@ class AggregateReporter
 
   private static function countAliases($physicians, $requestedAliasId)
   {
-//    if ($requestedAliasId) {
-//      $alias = Alias::find($requestedAliasId);
-//      return [
-//        [ 
-//          'id' => $alias->id, 
-//          'alias' => $alias->alias, 
-//          'count' => $physicians->count(),
-//        ],
-//      ];
-//    }
+    if ($requestedAliasId) {
+      $alias = Alias::find($requestedAliasId);
+      return [
+        [ 
+          'id' => $alias->id, 
+          'alias' => $alias->alias, 
+          'count' => $physicians->count(),
+        ],
+      ];
+    }
 
     $all = [];
     $physiciansArray = $physicians->get()->toArray();
