@@ -73,6 +73,17 @@ class LocationParser
     return $out;
   }
 
+  public static function getDigits($value)
+  {
+
+    $re = "/\\d+/";
+    if (preg_match($re, trim($value), $out) === 1) {
+      return $out[0];
+    }
+
+    return null;
+  }
+
   private static function lastToken($tokens)
   {
     return [
