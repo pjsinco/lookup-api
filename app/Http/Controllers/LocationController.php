@@ -12,11 +12,11 @@ use League\Fractal;
 use League\Fractal\Manager;
 use App\Transformers\LocationTransformer;
 use EllipseSynergie\ApiResponse\Contracts\Response;
+use Elit\LocationParser;
 
 
 class LocationController extends Controller
 {
-    
     public function __construct(Response $response)
     {
         $this->response = $response;
@@ -45,6 +45,8 @@ class LocationController extends Controller
     {
         return mb_strpos($string, ',') > 0;
     }
+
+
 
     /**
      * Get locations based on Zip code.
@@ -80,22 +82,54 @@ class LocationController extends Controller
     {
         $location = $request->q;
 
-        // if we have a comma, split the string on it
-        if ($this->hasComma($location)) {
-            $locationSplit = $this->splitLocation($location);
-            $city = trim($locationSplit[0]);
-            $state = trim($locationSplit[1]);
+        $zip = LocationParser::getZip($location);
 
-            $locations = App\Location::where('city', '=', $city)
-                ->where('state', 'like', $state. '%')
-                ->get();
+        $locations = null;
+
+        if (!empty($zip)) {
+          $locations = App\Location::where('zip', '=', $zip)
+            ->groupBy(['city', 'zip'])
+            ->get();
         } else {
-            $locations = App\Location::where('zip', 'like', $location . '%')
-                ->orWhere('city', 'like', $location . '%')
-                ->groupBy(['city', 'zip'])
-                ->get();
+          $parsedLocation = LocationParser::parseLocation($location);
+
+          if (isset($parsedLocation['state'])) {
+            $state = $parsedLocation['state'];
+            $city = $parsedLocation['rest'];
+            $rawLocations = App\Location::where('city', '=', $city)
+              ->where('state', 'like', $state . '%')
+              ->get();
+          } else {
+            $city = implode(' ', $parsedLocation);
+            $rawLocations = App\Location::where('city', 'LIKE', $city . '%')
+              ->get();
+          }
+          
+          $filtered = $rawLocations->filter(function($item) { 
+            return $item['zip'] == ''; 
+          })->all();
+
+          $locations = (empty($filtered) ? $rawLocations : $filtered);
         }
-        
+//        if ($this->hasZip($location)) {
+//            $locations = App\Location::where('zip', 'like', $location . '%')
+//                ->orWhere('city', 'like', $location . '%')
+//                ->groupBy(['city', 'zip'])
+//                ->get();
+//        } else if ($this->hasComma($location)) { // if we have a comma, split the string on it
+//            $locationSplit = $this->splitLocation($location);
+//            $city = trim($locationSplit[0]);
+//            $state = trim($locationSplit[1]);
+//            $locations = App\Location::where('city', '=', $city)
+//                ->where('state', 'like', $state. '%')
+//                ->get();
+//        } else {
+//            $locations = App\Location::where('zip', 'like', $location . '%')
+//                ->orWhere('city', 'like', $location . '%')
+//                ->groupBy(['city', 'zip'])
+//                ->get();
+//        }
+
         if (! $locations->isEmpty()) {
             return $this->response->withCollection(
                 $locations,
@@ -208,4 +242,5 @@ class LocationController extends Controller
         $location = (array) App\Location::random();
         return view('locations.try-this', ['location' => $location]);
     }
+
 }
