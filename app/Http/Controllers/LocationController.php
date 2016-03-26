@@ -82,13 +82,13 @@ class LocationController extends Controller
     {
         $location = $request->q;
 
-        $zip = LocationParser::getZip($location);
+        $zip = LocationParser::getDigits($location);
 
         $locations = null;
 
         if (!empty($zip)) {
-          $locations = App\Location::where('zip', '=', $zip)
-            ->groupBy(['city', 'zip'])
+          $locations = App\Location::where('zip', 'like', $zip . '%')
+            //->groupBy(['zip'])
             ->get();
         } else {
           $parsedLocation = LocationParser::parseLocation($location);
@@ -107,9 +107,9 @@ class LocationController extends Controller
           
           $filtered = $rawLocations->filter(function($item) { 
             return $item['zip'] == ''; 
-          })->all();
+          });
 
-          $locations = (empty($filtered) ? $rawLocations : $filtered);
+          $locations = ($filtered->isEmpty() ? $rawLocations : $filtered);
         }
 //        if ($this->hasZip($location)) {
 //            $locations = App\Location::where('zip', 'like', $location . '%')
