@@ -86,6 +86,7 @@ class LocationController extends Controller
 
         $locations = null;
 
+        // Zip is trump: Use it first if we have it
         if (!empty($zip)) {
           $locations = App\Location::where('zip', 'like', $zip . '%')
             //->groupBy(['zip'])
@@ -111,6 +112,10 @@ class LocationController extends Controller
 
           $locations = ($filtered->isEmpty() ? $rawLocations : $filtered);
         }
+
+        // Show the most populous first
+        $sorted = $locations->sortByDesc('pop');
+
 //        if ($this->hasZip($location)) {
 //            $locations = App\Location::where('zip', 'like', $location . '%')
 //                ->orWhere('city', 'like', $location . '%')
@@ -130,22 +135,22 @@ class LocationController extends Controller
 //                ->get();
 //        }
 
-        if (! $locations->isEmpty()) {
-            return $this->response->withCollection(
-                $locations,
-                new LocationTransformer
-            );
-        }
+      if (! $sorted->isEmpty()) {
+        return $this->response->withCollection(
+          $sorted,
+          new LocationTransformer
+        );
+      }
 
-        $errorMeta = [
-            'error' => [
-                'code' => 'GEN-NOT-FOUND',
-                'http_code' => 404,
-                'message' => 'Location not found'
-            ]
-        ]; 
+      $errorMeta = [
+        'error' => [
+          'code' => 'GEN-NOT-FOUND',
+          'http_code' => 404,
+          'message' => 'Location not found'
+        ]
+      ]; 
 
-        return $this->response->withArray($errorMeta);
+      return $this->response->withArray($errorMeta);
     }
 
     /**
