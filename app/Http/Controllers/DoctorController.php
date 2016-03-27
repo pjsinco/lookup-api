@@ -201,8 +201,12 @@ class DoctorController extends Controller
     }
 
     $location = Location::where('city', '=', $request->city)
-    ->where('state', '=', $request->state)
-    ->first();
+      ->where('state', '=', $request->state)
+      ->get()
+      ->filter(function($item) {  // use the city center entry, which has no zip
+        return $item['zip'] == ''; 
+      })
+      ->first();
     $coords['lat'] = $location->lat;
     $coords['lon'] = $location->lon;
     return $coords;
