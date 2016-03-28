@@ -102,6 +102,10 @@ class DoctorController extends Controller
       'radius' => $searchDistance,
       'order_by' => $request->order_by,
       'sort' => $request->sort,
+      'center' => [
+        'lat' => $coords['lat'],
+        'lon' => $coords['lon'],
+      ],
     ];
 
     $physicians = $physicians->orderBy($orderBy, $sort)
@@ -126,30 +130,8 @@ class DoctorController extends Controller
   {
     $physician = Physician::find($id);
 
-    //if ($physician) {
     return $this->response
       ->withItem($physician, new PhysicianTransformer);
-    //}
-
-//    $errorMeta = [
-//      'error' => [
-//      'code' => 'GEN-NOT-FOUND',
-//      'http_code' => 404,
-//      'message' => 'Physician not found'
-//      ]
-//    ]; 
-
-    //return $this->response->withArray($errorMeta);
-
-    //$resource = new Fractal\Resource\Item($phys, new PhysicianTransformer);
-    //$output = $this->manager->createData($resource)->toArray();
-
-    //return $output;
-
-
-    //return $this->respond([
-    //'data' => $this->physicianTransformer->transform($physician)
-    //]);
   }
 
   /**
@@ -193,11 +175,11 @@ class DoctorController extends Controller
   public function getCoordinates(Request $request) 
   {
     if ($request->has('zip')) {
-    $location = Location::where('zip', '=', $request->zip)
-      ->get();
-    $coords['lat'] = $location[0]->lat;
-    $coords['lon'] = $location[0]->lon;
-    return $coords;
+      $location = Location::where('zip', '=', $request->zip)
+        ->get();
+      $coords['lat'] = $location[0]->lat;
+      $coords['lon'] = $location[0]->lon;
+      return $coords;
     }
 
     $location = Location::where('city', '=', $request->city)
