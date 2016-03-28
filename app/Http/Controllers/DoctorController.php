@@ -17,6 +17,7 @@ use App\Location;
 use League\Fractal;
 use League\Fractal\Manager;
 use EllipseSynergie\ApiResponse\Contracts\Response;
+use Illuminate\Support\Str;
 
 class DoctorController extends Controller
 {
@@ -88,10 +89,10 @@ class DoctorController extends Controller
     $alias = Alias::find($request->alias_id);
 
     $queryMeta = [
-      'city' => urldecode($request->city),
-      'state' => $request->state,
+      'city' => Str::title(urldecode($request->city)),
+      'state' => mb_strtoupper($request->state),
       'zip' => $request->zip ? 
-      $request->zip : $this->getZip($request->city, $request->state),
+        $request->zip : $this->getZip($request->city, $request->state),
       //'alias_id' => $request->alias_id ? $request->alias_id : null,
       'alias' => $alias ? $alias->alias : null,
       'alias_id' => $alias ? $alias->id : null,
