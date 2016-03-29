@@ -171,17 +171,17 @@ class LocationParser
 
     $tokens = self::tokenize($location);
     $state = null;
-    if (isset($tokens['last'])) {
-      $state = self::stateAbbrev($tokens['last']['lastToken']);
-      $rest = implode(' ', $tokens['last']['rest']);
-    } 
-
-    if (empty($state)) {
-      if (isset($tokens['lastTwo'])) {
-        $state = self::stateAbbrev($tokens['lastTwo']['lastTwoTokens']);
-        $rest = implode(' ', $tokens['lastTwo']['rest']);
-      }
-    }
+//    if (isset($tokens['last'])) {
+//      $state = self::stateAbbrev($tokens['last']['lastToken']);
+//      $rest = implode(' ', $tokens['last']['rest']);
+//    } 
+//
+//    if (empty($state)) {
+//      if (isset($tokens['lastTwo'])) {
+//        $state = self::stateAbbrev($tokens['lastTwo']['lastTwoTokens']);
+//        $rest = implode(' ', $tokens['lastTwo']['rest']);
+//      }
+//    }
   
     if (!empty($state)) {
       return [
