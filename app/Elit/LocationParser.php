@@ -8,47 +8,17 @@ use Elit\USStates;
  */
 class LocationParser
 {
-
-  /**
-   * Remove all n > 1 white spaces.
-   *
-   */
-  public static function spaceStrip($value)
-  {
-    return trim(preg_replace('/\s\s+/', ' ', $value));
-  }
-
-  /**
-   * Replace a comma with a space.
-   *
-   */
-  public static function commaStrip($value)
-  {
-    return trim(self::spaceStrip(preg_replace('/,/', ' ', $value)));
-  }
-
-  /**
-   * Replace common punctuation characters with a space
-   *
-   */
-  public static function punctStrip($value)
-  {
-    return self::spaceStrip(
-      preg_replace('/[.,\/#!$%\^&\*;:{}=\-_`~()]/', ' ', $value)
-    );
-  }
-
   
   /**
-   * Split a value on punctuation, white space.
+   * Split a value on punctuation, white space
    *
    */
   public static function tokenize($value)
   {
-    $punctStripped = self::punctStrip($value);
-    //$commaStripped = self::commaStrip($punctStripped);
-    $spaceStripped = self::spaceStrip($punctStripped);
-    
+    $punctStripped = 
+      preg_replace('/[.,\/#!$%\^&\*;:{}=\-_`~()]/', ' ', $value);
+
+    $spaceStripped = trim(preg_replace('/\s\s+|,/', ' ', $punctStripped));
 
     $tokenized = null;
 
@@ -147,24 +117,12 @@ class LocationParser
     return ucwords(strtolower($fullStateName));
   }
 
-  /**
-   * Close up two letters when separated by a space
-   *
-   */
-  public static function closeUp($value)
-  {
-    return preg_replace('/^(\\w)\\s(\\w)/i', '$1$2', $value);
-  }
-
   public static function stateAbbrev($abbrev) {
-    $stripped = self::punctStrip($abbrev);
-    $closedUp = self::closeUp($stripped);
-
-    if (isset(USStates::$uspsStates[self::normalizeAbbrev($closedUp)])) {
-      return self::normalizeAbbrev($closedUp);
+    if (isset(USStates::$uspsStates[self::normalizeAbbrev($abbrev)])) {
+      return self::normalizeAbbrev($abbrev);
     } else if (
         $stateAbbrev = array_search(
-          self::normalizeFullState($closedUp), 
+          self::normalizeFullState($abbrev), 
           USStates::$uspsStates
         )
       ) {
@@ -174,31 +132,6 @@ class LocationParser
     return null;
   }
 
-  /**
-   * Convert forms of of St., Ft. and Mt. to 
-   * Saint, Fort and Mount.
-   *
-   */
-  public static function transformCity($value)
-  {
-    $stripped = self::spaceStrip($value);
-
-    $saintRe = "/^(st\\.?)\\s|^st\\.?$/i";
-    //$mountRe = "/^(mt\\.?)\\s/i";
-    $mountRe = "/^(mt\\.?)\\s|^mt\\.?$/i";
-    //$fortRe = "/^(ft\\.?)\\s/i";
-    $fortRe = "/^(ft\\.?)\\s|^ft\\.?$/i";
-
-    if (preg_match($saintRe, $stripped) > 0) {
-      return preg_replace($saintRe, 'saint ', $stripped);
-    } else if (preg_match($mountRe, $stripped) > 0) {
-      return preg_replace($mountRe, 'mount ', $stripped);
-    } else if (preg_match($fortRe, $stripped) > 0) {
-      return preg_replace($fortRe, 'fort ', $stripped);
-    }
-
-    return $value;
-  }
   
   /**
    * Split string on comma.
@@ -229,12 +162,9 @@ class LocationParser
     if (self::hasComma($location)) {
       $split = self::splitOnOneComma($location);
       if ($split) {
-        // Uppercase if we have an abbrev
-        $state = (preg_match('/^\w\w$/', $split[1]) > 0) ? 
-          self::normalizeAbbrev($split[1]) : $split[1];
         return [
-          'state' => $state,
-          'rest' => trim(self::transformCity($split[0])),
+          'state' => $split[1],
+          'rest' => $split[0],
         ];
       }
     }
@@ -243,31 +173,32 @@ class LocationParser
     $state = null;
     if (isset($tokens['last'])) {
       $state = self::stateAbbrev($tokens['last']['lastToken']);
-      $rest = trim(self::transformCity(implode(' ', $tokens['last']['rest'])));
+      $rest = implode(' ', $tokens['last']['rest']);
     } 
 
     if (empty($state)) {
       if (isset($tokens['lastTwo'])) {
         $state = self::stateAbbrev($tokens['lastTwo']['lastTwoTokens']);
-        $rest = trim(self::transformCity(implode(' ', $tokens['lastTwo']['rest'])));
+        $rest = implode(' ', $tokens['lastTwo']['rest']);
       }
     }
   
     if (!empty($state)) {
       return [
         'state' => $state,
-        'rest' => trim(self::transformCity($rest)),
+        'rest' => $rest,
       ];
     }
 
-    return array_map(function($token) {
-      return trim(self::transformCity($token));
-    }, $tokens['all']);
+    return $tokens['all'];
 
 
     //if (empty($state)) {
     //$state = self::stateAbbrev(self::lastTwoTokens($tokens));
     //}
+
+
+
 
   }
 }
