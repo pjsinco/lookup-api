@@ -171,3 +171,9 @@ where `table_schema` = 'findyourdo'
 csvcut -c aoa_mem_id,full_name,prefix,first_name,middle_name,last_name,suffix,designation,SortColumn,MemberStatus,City,State_Province,Zip,Country,COLLEGE_CODE,YearOfGraduation,fellows,PrimaryPracticeFocusCode,PrimaryPracticeFocusArea,SecondaryPracticeFocusCode,SecondaryPracticeFocusArea,website,AOABoardCertified,address_1,address_2,Phone,Email,ABMS,Gender,CERT1,CERT2,CERT3,CERT4,CERT5,lat,lon,geo_confidence,geo_city,geo_state,geo_matches 
 ```
 
+#####Wed Mar 30 16:31:59 2016 CDT
+###Cors issue
+* [Laracasts forum](https://laracasts.com/discuss/channels/requests/laravel-5-cors-headers-with-filters?page=4)
+* Blog: [Laravel-5 REST API and CORS](https://blog.nikhilben.com/2015/09/02/laravel5-rest-api-and-cors/)
+  * Looks like best thing to try first
+* Packagist: [barryvdh/laravel-cors](https://packagist.org/packages/barryvdh/laravel-cors)
