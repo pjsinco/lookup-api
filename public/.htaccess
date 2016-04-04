@@ -14,3 +14,12 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# See: http://blog.blakesimpson.co.uk/read/
+#  64-apache-configure-cors-headers-for-whitelist-domains
+#
+#<IfModule mod_headers.c>
+#    SetEnvIfNoCase Origin "https?:\/\/(www\.)?(doctorsthatdo\.org|dev2\.doctorsthatdo\.org|doctorsthatdo\.dev)(:\d+)?$" ACAO=$0
+#    Header set Access-Control-Allow-Origin %{ACAO}e env=ACAO
+#</IfModule>
+~
