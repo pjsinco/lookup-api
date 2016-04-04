@@ -22,4 +22,3 @@
 #    SetEnvIfNoCase Origin "https?:\/\/(www\.)?(doctorsthatdo\.org|dev2\.doctorsthatdo\.org|doctorsthatdo\.dev)(:\d+)?$" ACAO=$0
 #    Header set Access-Control-Allow-Origin %{ACAO}e env=ACAO
 #</IfModule>
-~
