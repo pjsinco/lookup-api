@@ -54,19 +54,6 @@ dd($results);
 
 });
 
-Route::get('test/mail', function() {
-
-  \Mail::send([], [], function($message) {
-    $message->to('psinco@osteopathic.org', 'Patrick Sinco')
-      ->from('mail@findyourdo.org', 'Find Your DO Lookup')
-      ->subject('hiya')
-      ->setBody('Hello. Hello. Hello.');
-  });
-
-  return 'sent a test email';
-
-});
-
 Route::get('test/mssql/{id}', function($id) {
     $user = env('MSSQL_USERNAME');
     $password = env('MSSQL_PASSWORD');
