@@ -5,11 +5,15 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use DB;
 use Log;
+use Mail;
 use Elit\RefreshFromImis;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use Monolog\Handler\SwiftMailerHandler;
+use Monolog\Handler\BufferHandler;
+use Monolog\Formatter\LineFormatter;
 use Carbon\Carbon;
-
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class RefreshPhysicians extends Command
 {
@@ -45,6 +49,12 @@ class RefreshPhysicians extends Command
     private $backupTableName = 'physicians_safety_backup';
 
     /**
+     * Recipients of the log email
+     *
+     */
+    private $recipients = ['psinco@osteopathic.org',];
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -62,10 +72,35 @@ class RefreshPhysicians extends Command
 
         $this->log = new Logger($this->logName);
 
-        $this->log->pushHandler(
-            new StreamHandler(storage_path('logs/' . $this->logName)), 
-            Logger::INFO
+        // https://laracasts.com/discuss/channels/requests/log-to-mail
+        $swiftMessage = Mail::getSwiftMailer()
+          ->createMessage()
+          ->setFrom('mail@findyourdo.org', 'Find Your DO Lookup API')
+          ->setTo('psinco@osteopathic.org', 'Patrick Sinco')
+          ->setBody('hiya');
+      
+        $mailHandler = new SwiftMailerHandler(
+          Mail::getSwiftMailer(), 
+          $swiftMessage,
+          Logger::ERROR
         );
+
+        $streamHandler = new StreamHandler(
+          storage_path('logs/' . $this->logName), 
+          Logger::INFO
+        );
+
+        $formatter = new LineFormatter(
+          "[%datetime%] %level_name%: %message%\n", 
+          false,
+          true
+        );
+
+        $streamHandler->setFormatter($formatter);
+        $mailHandler->setFormatter($formatter);
+
+        $this->log->pushHandler($streamHandler);
+        $this->log->pushHandler(new BufferHandler ($mailHandler));
 
     }
 
@@ -239,6 +274,32 @@ class RefreshPhysicians extends Command
         $this->info(PHP_EOL);
     }
 
+    private function sendMail($subject, $contents) 
+    {
+      if (empty($subject)) {
+        $subject = $this->logName;
+      }
+
+      Mail::send([], [], function($message) use ($subject, $contents) {
+        $message->to($this->recipients)
+          ->from('mail@findyourdo.org', 'Find Your DO Lookup API')
+          ->subject($subject)
+          ->setBody($contents);
+      });
+
+    }
+
+    private function emailLogFile()
+    {
+      try {
+        $contents = \File::get(storage_path('logs/' . $this->logName));
+        $this->sendMail($this->logName, $contents);
+      } catch (FileNotFoundException $fnf) {
+        $contents = ('Unable to find log file');
+        $this->sendMail('ERROR: ' . $this->logName, $contents);
+      }
+    }
+
     /**
      * Execute the console command.
      *
@@ -283,5 +344,6 @@ class RefreshPhysicians extends Command
         $this->createTempTable();
         $this->populateTempTable();
         $this->createPhysicianModels();
+        $this->emailLogFile();
     }
 }
