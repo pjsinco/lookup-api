@@ -199,7 +199,9 @@ class RefreshFromImis
 
     public static function truncatePhysiciansTable()
     {
+      if (Schema::hasTable('physicians')) {
         DB::table('physicians')->truncate();
+      }
     }
 
     public static function backupPhysiciansTable($backupTableName)
