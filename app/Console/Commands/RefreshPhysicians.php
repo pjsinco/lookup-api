@@ -109,7 +109,7 @@ class RefreshPhysicians extends Command
         RefreshFromImis::truncateImisTable($this->log);
 
         $this->info(PHP_EOL.'Fetching rows from iMIS ...'.PHP_EOL);
-        $this->log->info(PHP_EOL.'Fetching rows from iMIS ...'.PHP_EOL);
+        $this->log->info('Fetching rows from iMIS ...');
 
         $rows = RefreshFromImis::getRows($this->log);
 
@@ -132,14 +132,13 @@ class RefreshPhysicians extends Command
 
         $bar->finish();
 
-        $msg = sprintf(
-            PHP_EOL . PHP_EOL .  'Added: %d rows to imis_raw' . PHP_EOL, 
-            $rowCount
-        );
+        $msg = sprintf('Added: %d rows to imis_raw', $rowCount);
+
+        $msgForInfo = PHP_EOL . PHP_EOL . $msg . PHP_EOL;
 
         //Log::info($msg);
         $this->log->info($msg);
-        $this->info($msg);
+        $this->info($msgForInfo);
     }
 
     private function createTempTable()
@@ -241,7 +240,7 @@ class RefreshPhysicians extends Command
         $newPhysicians = RefreshFromImis::getPhysiciansToBeAdded();
         $info = sprintf('%d new physicians:', count($newPhysicians));
         $this->info(PHP_EOL . $info);
-        $this->log->info($info . PHP_EOL);
+        $this->log->info($info);
 
         $new = array_map(function($item) {
             return $item->full_name;
@@ -260,7 +259,7 @@ class RefreshPhysicians extends Command
         $removedPhysicians = RefreshFromImis::getPhysiciansToBeRemoved();
         $info = sprintf('%d physicians to be removed:', count($removedPhysicians));
         $this->info(PHP_EOL . $info);
-        $this->log->info($info . PHP_EOL);
+        $this->log->info($info);
 
         $removed = array_map(function($item) {
             return $item->full_name;
@@ -307,7 +306,7 @@ class RefreshPhysicians extends Command
      */
     public function handle()
     {
-        $this->log->info(PHP_EOL . 'Starting refresh ...' . PHP_EOL);
+        $this->log->info('Starting refresh ...');
         $this->info(PHP_EOL . 'Starting refresh ...' . PHP_EOL);
 
         if ($this->option('frombackup')) {
