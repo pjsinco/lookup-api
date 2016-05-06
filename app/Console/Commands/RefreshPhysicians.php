@@ -55,6 +55,12 @@ class RefreshPhysicians extends Command
     private $recipients = ['psinco@osteopathic.org',];
 
     /**
+     * Whether the refresh was successful
+     *
+     */
+    private $success = false;
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -175,7 +181,14 @@ class RefreshPhysicians extends Command
         
         $rows = RefreshFromImis::getImisRawRows();
 
+        if (!$rows) {
+          $this->error('Count not create physician models.');
+          $this->log->error('Count not create physician models.');
+          return;
+        }
+
         RefreshFromImis::truncatePhysiciansTable();
+
         $this->info('Truncated physicians table.' . PHP_EOL);
         $this->log->info('Truncated physicians table.' . PHP_EOL);
 
@@ -183,23 +196,25 @@ class RefreshPhysicians extends Command
         $this->log->info('Creating physician models ... ' . PHP_EOL);
 
         $bar = $this->output->createProgressBar(count($rows));
-        if ($rows) {
-            foreach ($rows as $row) {
-                $created = RefreshFromImis::createPhysicianModel($row, $this->log);
-                $bar->advance();
-            }
-        } else {
-            $this->error('Count not create physician models.');
-            $this->log->error('Count not create physician models.');
-            die();
+      
+        foreach ($rows as $row) {
+          $created = RefreshFromImis::createPhysicianModel($row, $this->log);
+            
+          if ($created) {
+            $bar->advance();
+          } else {
+            $this->error('Error creating physician model.');
+            $this->log->error('Error creating physician model.');
+          }
         }
 
         $rows = null; // needed? helps prevent memory leak?
 
         $bar->finish();
 
-        $this->info(PHP_EOL . PHP_EOL . 'Finished!' . PHP_EOL);
-        $this->log->info(PHP_EOL . PHP_EOL . 'Finished!' . PHP_EOL);
+        $this->info(PHP_EOL . PHP_EOL . 'Finished successfully!' . PHP_EOL);
+        $this->log->info(PHP_EOL . PHP_EOL . 'Finished successfully!' . PHP_EOL);
+        $this->success = true;
 
     }
 
@@ -209,8 +224,10 @@ class RefreshPhysicians extends Command
         
         if ($backedUp) {
             $this->info('Made safety backup of physicians table: ' . $tableName);
+            $this->log->info('Made safety backup of physicians table: ' . $tableName);
         } else {
             $this->error('Could not make safety backup of physicians table.');
+            $this->log->error('Could not make safety backup of physicians table.');
             die("Terminated because we could not back up the physicians table.");
         }
     }
@@ -290,12 +307,13 @@ class RefreshPhysicians extends Command
 
     private function emailLogFile()
     {
+      $subject = 'Refresh -- ' . ($this->success ? 'Successful' : 'Error');
       try {
         $contents = \File::get(storage_path('logs/' . $this->logName));
-        $this->sendMail($this->logName, $contents);
+        $this->sendMail($subject, $contents);
       } catch (FileNotFoundException $fnf) {
         $contents = ('Unable to find log file');
-        $this->sendMail('ERROR: ' . $this->logName, $contents);
+        $this->sendMail($subject, $contents);
       }
     }
 
