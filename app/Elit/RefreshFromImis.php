@@ -150,7 +150,7 @@ class RefreshFromImis
     public static function truncateImisTable(Logger $log)
     {
         DB::table('imis_raw')->truncate();
-        $log->info('Truncated imis_raw');
+        //$log->info('Truncated imis_raw');
     }
 
     public static function dropTempLocationTable()

@@ -52,7 +52,10 @@ class RefreshPhysicians extends Command
      * Recipients of the log email
      *
      */
-    private $recipients = ['psinco@osteopathic.org',];
+    private $recipients = [
+      'psinco@osteopathic.org',
+      //'bjohnson@osteopathic.org',
+    ];
 
     /**
      * Whether the refresh was successful
@@ -115,7 +118,7 @@ class RefreshPhysicians extends Command
         RefreshFromImis::truncateImisTable($this->log);
 
         $this->info(PHP_EOL.'Fetching rows from iMIS ...'.PHP_EOL);
-        $this->log->info('Fetching rows from iMIS ...');
+        //$this->log->info('Fetching rows from iMIS ...');
 
         $rows = RefreshFromImis::getRows($this->log);
 
@@ -124,7 +127,7 @@ class RefreshPhysicians extends Command
 
         $bar = $this->output->createProgressBar(count($rows));
         $this->info('Adding rows to imis_raw ...' . PHP_EOL);
-        $this->log->info('Adding rows to imis_raw ...' . PHP_EOL);
+        //$this->log->info('Adding rows to imis_raw ...' . PHP_EOL);
 
         $rowCount = 0;
 
@@ -138,7 +141,7 @@ class RefreshPhysicians extends Command
 
         $bar->finish();
 
-        $msg = sprintf('Added: %d rows to imis_raw', $rowCount);
+        $msg = sprintf('Added %d rows to imis_raw', $rowCount);
 
         $msgForInfo = PHP_EOL . PHP_EOL . $msg . PHP_EOL;
 
@@ -157,7 +160,7 @@ class RefreshPhysicians extends Command
             die();
         } else {
             $this->info('Created temporary location table'.PHP_EOL); 
-            $this->log->info('Created temporary location table'.PHP_EOL); 
+            //$this->log->info('Created temporary location table'.PHP_EOL); 
         }
 
     }
@@ -190,10 +193,10 @@ class RefreshPhysicians extends Command
         RefreshFromImis::truncatePhysiciansTable();
 
         $this->info('Truncated physicians table.' . PHP_EOL);
-        $this->log->info('Truncated physicians table.' . PHP_EOL);
+        //$this->log->info('Truncated physicians table.' . PHP_EOL);
 
         $this->info('Creating physician models ... ' . PHP_EOL);
-        $this->log->info('Creating physician models ... ' . PHP_EOL);
+        //$this->log->info('Creating physician models ... ' . PHP_EOL);
 
         $bar = $this->output->createProgressBar(count($rows));
       
@@ -224,7 +227,7 @@ class RefreshPhysicians extends Command
         
         if ($backedUp) {
             $this->info('Made safety backup of physicians table: ' . $tableName);
-            $this->log->info('Made safety backup of physicians table: ' . $tableName);
+            //$this->log->info('Made safety backup of physicians table: ' . $tableName);
         } else {
             $this->error('Could not make safety backup of physicians table.');
             $this->log->error('Could not make safety backup of physicians table.');
@@ -307,7 +310,8 @@ class RefreshPhysicians extends Command
 
     private function emailLogFile()
     {
-      $subject = 'Refresh -- ' . ($this->success ? 'Successful' : 'Error');
+      //$subject = 'Refresh -- ' . ($this->success ? 'Successful' : 'Error');
+      $subject = 'Refresh report';
       try {
         $contents = \File::get(storage_path('logs/' . $this->logName));
         $this->sendMail($subject, $contents);
@@ -324,7 +328,7 @@ class RefreshPhysicians extends Command
      */
     public function handle()
     {
-        $this->log->info('Starting refresh ...');
+        //$this->log->info('Starting refresh ...');
         $this->info(PHP_EOL . 'Starting refresh ...' . PHP_EOL);
 
         if ($this->option('frombackup')) {
