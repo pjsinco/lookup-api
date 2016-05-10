@@ -54,7 +54,7 @@ class RefreshPhysicians extends Command
      */
     private $recipients = [
       'psinco@osteopathic.org',
-      //'bjohnson@osteopathic.org',
+      'bjohnson@osteopathic.org',
     ];
 
     /**
@@ -215,8 +215,8 @@ class RefreshPhysicians extends Command
 
         $bar->finish();
 
-        $this->info(PHP_EOL . PHP_EOL . 'Finished successfully!' . PHP_EOL);
-        $this->log->info(PHP_EOL . PHP_EOL . 'Finished successfully!' . PHP_EOL);
+        $this->info(PHP_EOL . PHP_EOL . 'Refresh completed!' . PHP_EOL);
+        $this->log->info(PHP_EOL . PHP_EOL . 'Refresh completed!' . PHP_EOL);
         $this->success = true;
 
     }
