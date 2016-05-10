@@ -175,7 +175,7 @@ class RefreshPhysicians extends Command
             die();
         } else {
             $this->info('Successfully populated temporary location table' . PHP_EOL);
-            $this->log->info('Successfully populated temporary location table' . PHP_EOL);
+            //$this->log->info('Successfully populated temporary location table' . PHP_EOL);
         }
     }
     
