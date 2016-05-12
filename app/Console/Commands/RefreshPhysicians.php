@@ -146,7 +146,7 @@ class RefreshPhysicians extends Command
         $msgForInfo = PHP_EOL . PHP_EOL . $msg . PHP_EOL;
 
         //Log::info($msg);
-        $this->log->info($msg);
+        //$this->log->info($msg);
         $this->info($msgForInfo);
     }
 
