@@ -206,8 +206,9 @@ class RefreshPhysicians extends Command
           if ($created) {
             $bar->advance();
           } else {
-            $this->error('Error creating physician model.');
-            $this->log->error('Error creating physician model.');
+            $msg = 'Error creating physician model: ' . trim($row->full_name);
+            $this->error($msg);
+            $this->log->error($msg);
           }
         }
 
