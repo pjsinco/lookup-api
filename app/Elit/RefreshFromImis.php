@@ -272,7 +272,7 @@ class RefreshFromImis
         return DB::select(DB::raw('select * from imis_raw'));
     }
 
-    public static function parseGeoData($geoDataRaw)
+    public static function parseGeoData($geoDataRaw, $physicianName)
     {
         if (count($geoDataRaw->response->results) == 0) {
             return false;
@@ -289,20 +289,20 @@ class RefreshFromImis
             $data->geo_city = 
                 $geoDataRaw->response->results[0]->address_components->city;
           } else {
-            Log::warning('Unable to find city for ' . $physician->full_name);
-            $log->warning('Unable to find city for ' . $physician->full_name);
+            Log::warning('Unable to find city for ' . $physicianName);
+            $log->warning('Unable to find city for ' . $physicianName);
             return false;
           }
           $data->geo_state = 
               $geoDataRaw->response->results[0]->address_components->state;
           $data->geo_confidence = $geoDataRaw->response->results[0]->accuracy;
           $data->geo_matches = 0;
-        } catch (ErrorException $e) {
-          Log::warning('Unable to parse geodata for ' . $physician->full_name);
-          $log->warning('Unable to parse geodata for ' . $physician->full_name);
-          $data = null;
+          return $data;
+        } catch (Exception $e) {
+          Log::warning('Unable to parse geodata for ' . $physicianName);
+          $log->warning('Unable to parse geodata for ' . $physicianName);
+          return false;
         }
-        return $data;
 
     }
 
@@ -322,7 +322,7 @@ class RefreshFromImis
 
         try {
             $geoDataRaw = $client->get($data);
-            $geoData = self::parseGeoData($geoDataRaw);
+            $geoData = self::parseGeoData($geoDataRaw, $physician->full_name);
 
             return $geoData;
         } catch (GeocodioAuthError $gae) {
