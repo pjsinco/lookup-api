@@ -280,17 +280,26 @@ class RefreshFromImis
   
         try {
           $data = new \StdClass(); 
+
           $data->lat = $geoDataRaw->response->results[0]->location->lat;
           $data->lon = $geoDataRaw->response->results[0]->location->lng;
-          $data->geo_city = 
-              $geoDataRaw->response->results[0]->address_components->city;
+
+          // We don't always get a city back from geocod.io
+          if ($geoDataRaw->response->results[0]->address_components->city) {
+            $data->geo_city = 
+                $geoDataRaw->response->results[0]->address_components->city;
+          } else {
+            Log::warning('Unable to find city for ' . $physician->full_name);
+            $log->warning('Unable to find city for ' . $physician->full_name);
+            return false;
+          }
           $data->geo_state = 
               $geoDataRaw->response->results[0]->address_components->state;
           $data->geo_confidence = $geoDataRaw->response->results[0]->accuracy;
           $data->geo_matches = 0;
         } catch (ErrorException $e) {
-          Log::error('Unable to parse geodata for ' . $physician->full_name);
-          $log->notice('Unable to parse geodata for ' . $physician->full_name);
+          Log::warning('Unable to parse geodata for ' . $physician->full_name);
+          $log->warning('Unable to parse geodata for ' . $physician->full_name);
           $data = null;
         }
         return $data;
