@@ -277,18 +277,24 @@ class RefreshFromImis
         if (count($geoDataRaw->response->results) == 0) {
             return false;
         } 
-
-        $data = new \StdClass(); 
-        $data->lat = $geoDataRaw->response->results[0]->location->lat;
-        $data->lon = $geoDataRaw->response->results[0]->location->lng;
-        $data->geo_city = 
-            $geoDataRaw->response->results[0]->address_components->city;
-        $data->geo_state = 
-            $geoDataRaw->response->results[0]->address_components->state;
-        $data->geo_confidence = $geoDataRaw->response->results[0]->accuracy;
-        $data->geo_matches = 0;
-
+  
+        try {
+          $data = new \StdClass(); 
+          $data->lat = $geoDataRaw->response->results[0]->location->lat;
+          $data->lon = $geoDataRaw->response->results[0]->location->lng;
+          $data->geo_city = 
+              $geoDataRaw->response->results[0]->address_components->city;
+          $data->geo_state = 
+              $geoDataRaw->response->results[0]->address_components->state;
+          $data->geo_confidence = $geoDataRaw->response->results[0]->accuracy;
+          $data->geo_matches = 0;
+        } catch (ErrorException $e) {
+          Log::error('Unable to parse geodata for ' . $physician->full_name);
+          $log->notice('Unable to parse geodata for ' . $physician->full_name);
+          $data = null;
+        }
         return $data;
+
     }
 
     public static function geolocate($physician, $log)
