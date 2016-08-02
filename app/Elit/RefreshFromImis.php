@@ -15,7 +15,7 @@ use Elit\AggregateReporter;
  */
 class RefreshFromImis
 {
-    private static $tempLocationTable = 'temp_locations';
+    const TEMP_LOCATION_TABLE = 'temp_locations';
 
     /**
      * 
@@ -155,7 +155,7 @@ class RefreshFromImis
 
     public static function dropTempLocationTable()
     {
-        return DB::statement("drop table if exists " . self::$tempLocationTable);
+        return DB::statement("drop table if exists " . self::TEMP_LOCATION_TABLE);
     }
 
     public static function createTempLocationTable()
@@ -163,7 +163,7 @@ class RefreshFromImis
         self::dropTempLocationTable();
 
         $q = "
-            CREATE TABLE IF NOT EXISTS " . self::$tempLocationTable . "(
+            CREATE TABLE IF NOT EXISTS " . self::TEMP_LOCATION_TABLE . "(
                 City VARCHAR(255),
                 State_Province VARCHAR(16),
                 Zip VARCHAR(16),
@@ -186,7 +186,7 @@ class RefreshFromImis
     public static function populateTempLocationTable()
     {
         $q = "
-            INSERT INTO " . self::$tempLocationTable . "
+            INSERT INTO " . self::TEMP_LOCATION_TABLE . "
                 SELECT City, State_Province, Zip, address_1, address_2, 
                     lat, lon, geo_confidence, geo_city, geo_state, geo_matches
                 FROM physicians;
@@ -351,7 +351,7 @@ class RefreshFromImis
     private static function getPhysicianLocationData($physician, Logger $log)
     {
         $geoData = DB::selectOne("select *
-                from " . self::$tempLocationTable . "
+                from " . self::TEMP_LOCATION_TABLE . "
                 where address_1 = :address
                     and City = :city
                     and State_Province = :state
