@@ -285,7 +285,7 @@ class RefreshFromImis
           $data->lon = $geoDataRaw->response->results[0]->location->lng;
 
           // We don't always get a city back from geocod.io
-          if ($geoDataRaw->response->results[0]->address_components->city) {
+          if (isset($geoDataRaw->response->results[0]->address_components->city)) {
             $data->geo_city = 
                 $geoDataRaw->response->results[0]->address_components->city;
           } else {
