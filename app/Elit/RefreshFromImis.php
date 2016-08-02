@@ -272,7 +272,7 @@ class RefreshFromImis
         return DB::select(DB::raw('select * from imis_raw'));
     }
 
-    public static function parseGeoData($geoDataRaw, $physicianName)
+    public static function parseGeoData($geoDataRaw, $physicianName, $log)
     {
         if (count($geoDataRaw->response->results) == 0) {
             return false;
@@ -322,7 +322,8 @@ class RefreshFromImis
 
         try {
             $geoDataRaw = $client->get($data);
-            $geoData = self::parseGeoData($geoDataRaw, $physician->full_name);
+            $geoData = 
+              self::parseGeoData($geoDataRaw, $physician->full_name, $log);
 
             return $geoData;
         } catch (GeocodioAuthError $gae) {
