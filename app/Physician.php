@@ -179,12 +179,12 @@ class Physician extends Model
     );
 
     // Search both primary and secondary specialties
-    //return $query->where(function($query) use ($specialties) {
-      //$query->whereIn('PrimaryPracticeFocusCode', $specialties)
-            //->orWhereIn('SecondaryPracticeFocusCode', $specialties);
-    //});
+    return $query->where(function($query) use ($specialties) {
+      $query->whereIn('PrimaryPracticeFocusCode', $specialties)
+            ->orWhereIn('SecondaryPracticeFocusCode', $specialties);
+    });
 
-    return $query->whereIn('PrimaryPracticeFocusCode', $specialties);
+    //return $query->whereIn('PrimaryPracticeFocusCode', $specialties);
     
   }
 }
