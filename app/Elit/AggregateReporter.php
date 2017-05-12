@@ -30,8 +30,9 @@ class AggregateReporter
   /**
    * Get aliases for a specialty
    *
+   * @param array $specialtyCodes The specialty codes to look up
    */
-  public static function getAliases($specialtyCode)
+  public static function getAliases($specialtyCodes)
   {
     $alias = DB::table('specialty_alias')
       ->join(
@@ -41,7 +42,7 @@ class AggregateReporter
         'aliases.id' 
       )
       //->select('aliases.alias')
-      ->where('specialty_alias.specialty_id', '=', $specialtyCode)
+      ->whereIn('specialty_alias.specialty_id', $specialtyCodes)
       ->get();
 
     return $alias;
@@ -69,7 +70,6 @@ class AggregateReporter
     $physiciansArray = $physicians->get()->toArray();
 
     foreach ($physiciansArray as $physician) {
-
       // start make-believe code
       $physAliases = [];
 
@@ -77,7 +77,10 @@ class AggregateReporter
         $physAliases,
         $physician['alias_1'], 
         $physician['alias_2'], 
-        $physician['alias_3']
+        $physician['alias_3'],
+        $physician['alias_4'],
+        $physician['alias_5'],
+        $physician['alias_6']
       );
 
       //$physAliases = self::getAliases($physician['PrimaryPracticeFocusCode']);

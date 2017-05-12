@@ -58,6 +58,9 @@ class CreatePhysiciansTable extends Migration
             $table->integer('alias_1')->unsigned()->nullable();
             $table->integer('alias_2')->unsigned()->nullable();
             $table->integer('alias_3')->unsigned()->nullable();
+            $table->integer('alias_4')->unsigned()->nullable();
+            $table->integer('alias_5')->unsigned()->nullable();
+            $table->integer('alias_6')->unsigned()->nullable();
         });
     }
 

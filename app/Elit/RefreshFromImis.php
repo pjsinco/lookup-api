@@ -257,6 +257,9 @@ class RefreshFromImis
             $table->integer('alias_1')->unsigned()->nullable();
             $table->integer('alias_2')->unsigned()->nullable();
             $table->integer('alias_3')->unsigned()->nullable();
+            $table->integer('alias_4')->unsigned()->nullable();
+            $table->integer('alias_5')->unsigned()->nullable();
+            $table->integer('alias_6')->unsigned()->nullable();
         });
 
         $q = "
@@ -428,6 +431,9 @@ class RefreshFromImis
             'alias_1'                    => empty($aliases[0]) ? null : $aliases[0]->id,
             'alias_2'                    => empty($aliases[1]) ? null : $aliases[1]->id,
             'alias_3'                    => empty($aliases[2]) ? null : $aliases[2]->id,
+            'alias_4'                    => empty($aliases[3]) ? null : $aliases[3]->id,
+            'alias_5'                    => empty($aliases[4]) ? null : $aliases[4]->id,
+            'alias_6'                    => empty($aliases[5]) ? null : $aliases[5]->id,
         ]);
 
         return !empty($physician) ? true : false;

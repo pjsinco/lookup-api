@@ -57,6 +57,9 @@ class Physician extends Model
     'alias_1',
     'alias_2',
     'alias_3',
+    'alias_4',
+    'alias_5',
+    'alias_6',
   ];
 
   public $hidden = [
@@ -184,6 +187,7 @@ class Physician extends Model
             ->orWhereIn('SecondaryPracticeFocusCode', $specialties);
     });
 
+    // Search only primary specialty
     //return $query->whereIn('PrimaryPracticeFocusCode', $specialties);
     
   }
