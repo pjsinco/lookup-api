@@ -113,6 +113,7 @@ class DoctorController extends Controller
       ->paginate($limit)
       ->appends($request->query());
 
+
     return $this->response->withPaginator(
       $physicians,
       new PhysicianTransformer,

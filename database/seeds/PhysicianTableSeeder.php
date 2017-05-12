@@ -14,7 +14,7 @@ class PhysicianTableSeeder extends Seeder
     {
         DB::table('physicians')->truncate();
 
-        $physicians = $this->getCsv('physicians-2016-03-27.csv');
+        $physicians = $this->getCsv('physicians-2017-05-11.csv');
         $this->seedTable($physicians);
     }
 
@@ -28,7 +28,7 @@ class PhysicianTableSeeder extends Seeder
     {
         foreach ($data as $lineIndex => $row) {
 
-            $aliases = AggregateReporter::getAliases($row[17]);
+            $aliases = AggregateReporter::getAliases([$row[17], $row[19]]);
 
             DB::table('physicians')->insert([
                 'aoa_mem_id'                 => $row[0],
@@ -74,6 +74,9 @@ class PhysicianTableSeeder extends Seeder
                 'alias_1'                    => (empty($aliases[0]) ? null : $aliases[0]->id),
                 'alias_2'                    => (empty($aliases[1]) ? null : $aliases[1]->id),
                 'alias_3'                    => (empty($aliases[2]) ? null : $aliases[2]->id),
+                'alias_4'                    => (empty($aliases[3]) ? null : $aliases[3]->id),
+                'alias_5'                    => (empty($aliases[4]) ? null : $aliases[4]->id),
+                'alias_6'                    => (empty($aliases[5]) ? null : $aliases[5]->id),
             ]);
         }
     }
