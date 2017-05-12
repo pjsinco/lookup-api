@@ -78,9 +78,9 @@ class AggregateReporter
         $physician['alias_1'], 
         $physician['alias_2'], 
         $physician['alias_3'],
-        array_key_exists($physician['alias_4']) ? $physician['alias_4'] : null,
-        array_key_exists($physician['alias_5']) ? $physician['alias_5'] : null,
-        array_key_exists($physician['alias_6']) ? $physician['alias_6'] : null
+        array_key_exists('alias_4', $physician) ? $physician['alias_4'] : null,
+        array_key_exists('alias_5', $physician) ? $physician['alias_5'] : null,
+        array_key_exists('alias_6', $physician) ? $physician['alias_6'] : null
       );
 
       //$physAliases = self::getAliases($physician['PrimaryPracticeFocusCode']);
