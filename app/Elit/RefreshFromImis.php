@@ -385,7 +385,11 @@ class RefreshFromImis
             return;
         }
 
-        $aliases = AggregateReporter::getAliases($row->PrimaryPracticeFocusCode);
+        //$aliases = AggregateReporter::getAliases($row->PrimaryPracticeFocusCode);
+        $aliases = AggregateReporter::getAliases([
+          $row->PrimaryPracticeFocusCode, 
+          $row->SecondaryPracticeFocusCode
+        ]);
 
         $physician = \App\Physician::create([
             'aoa_mem_id'                 => trim($row->id),
