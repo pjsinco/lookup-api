@@ -2,7 +2,7 @@
 
 // TODO fix in production
 //header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Origin: http://doctorsthatdo.org");
+header("Access-Control-Allow-Origin: https://doctorsthatdo.org");
 
 /**
  * Laravel - A PHP Framework For Web Artisans
