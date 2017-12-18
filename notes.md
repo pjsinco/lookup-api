@@ -109,7 +109,7 @@ const DISTANCE_UNIT_MILES      = 69.0;
         } else {
             throw new Exception("Unknown distance unit measure '$units'.");
         }
-    }
+    > }
 ))>))}
 ```
 
@@ -177,3 +177,6 @@ csvcut -c aoa_mem_id,full_name,prefix,first_name,middle_name,last_name,suffix,de
 * Blog: [Laravel-5 REST API and CORS](https://blog.nikhilben.com/2015/09/02/laravel5-rest-api-and-cors/)
   * Looks like best thing to try first
 * Packagist: [barryvdh/laravel-cors](https://packagist.org/packages/barryvdh/laravel-cors)
+
+###### Mon Dec 18 11:56:36 2017 CST
+* [The Comprehensive Guide to URL Parameter Encryption in PHP - Paragon Initiative Enterprises Blog](https://paragonie.com/blog/2015/09/comprehensive-guide-url-parameter-encryption-in-php)
