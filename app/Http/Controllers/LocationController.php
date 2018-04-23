@@ -20,7 +20,6 @@ class LocationController extends Controller
     public function __construct(Response $response)
     {
         $this->response = $response;
-        $this->middleware('ajax', ['only' => ['index', 'search', 'show']]);
     }
 
     /**

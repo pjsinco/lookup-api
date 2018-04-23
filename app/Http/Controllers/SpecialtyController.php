@@ -17,7 +17,6 @@ class SpecialtyController extends Controller
     public function __construct(Response $response)
     {
         $this->response = $response;
-        $this->middleware('ajax');
     }
 
     public function index()

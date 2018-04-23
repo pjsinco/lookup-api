@@ -37,7 +37,6 @@ class DoctorController extends Controller
 
   public function __construct(Response $response)
   {
-    $this->middleware('ajax', ['only' => ['search', 'show']]);
     $this->response = $response;
   }
 
