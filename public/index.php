@@ -6,14 +6,15 @@
  *      access-control-allow-origin-multiple-origin-domains
  *
  */
-$httpOrigin = $_SERVER['HTTP_ORIGIN'];
+if (isset($_SERVER['HTTP_REFERER'])) {
+  $httpOrigin = $_SERVER['HTTP_REFERER'];
 
-if ($httpOrigin === 'http://doctorsthatdo.org') {
-  header("Access-Control-Allow-Origin: $httpOrigin");
-} else {
-  header("Access-Control-Allow-Origin: https://doctorsthatdo.org");
+  if ($httpOrigin === 'http://doctorsthatdo.org') {
+    header("Access-Control-Allow-Origin: $httpOrigin");
+  } else {
+    header("Access-Control-Allow-Origin: https://doctorsthatdo.org");
+  }
 }
-
 
 /**
  * Laravel - A PHP Framework For Web Artisans
