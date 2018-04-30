@@ -1,21 +1,5 @@
 <?php
 
-
-/**
- * @see https://stackoverflow.com/questions/1653308/
- *      access-control-allow-origin-multiple-origin-domains
- *
- */
-if (isset($_SERVER['HTTP_REFERER'])) {
-  $httpOrigin = $_SERVER['HTTP_REFERER'];
-
-  if ($httpOrigin === 'http://doctorsthatdo.org') {
-    header("Access-Control-Allow-Origin: $httpOrigin");
-  } else {
-    header("Access-Control-Allow-Origin: https://doctorsthatdo.org");
-  }
-}
-
 /**
  * Laravel - A PHP Framework For Web Artisans
  *
