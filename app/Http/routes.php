@@ -9,15 +9,7 @@ Route::get('/', function() {
 Route::group(['prefix' => 'api/v1'], function() {
 
     /**
-     * Physicians
-     *
-     */
-    //Route::get('physicians/names/search', 'PhysicianController@nameSearch');
-    //Route::get('physicians/search', 'PhysicianController@search');
-    //Route::get('physicians/{id}', 'PhysicianController@show');
-
-    /**
-     * Physicians
+     * Doctors
      *
      */
     Route::get('doctors/search', 'DoctorController@search');
@@ -39,8 +31,6 @@ Route::group(['prefix' => 'api/v1'], function() {
 });
 
 Route::get('locations/try-this-one', 'LocationController@tryThisOne');
-
-//Route::get('refresh/', 'RefreshController@refresh');
 
 Route::get('test/escape', function() {
 
@@ -72,5 +62,3 @@ Route::get('test/mssql/{id}', function($id) {
      
     $current = App\Physician::where('aoa_mem_id', '=', (int) $row['id'])->first();
 });
-
-
