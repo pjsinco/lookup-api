@@ -49,16 +49,17 @@ Route::get('test/mssql/{id}', function($id) {
     $password = env('MSSQL_PASSWORD');
 
     $db = new PDO(
-        'dblib:host=sql05-1.aoanet.local;dbname=imis', 
+        //'dblib:host=sql05-1.aoanet.local;dbname=imis', 
+        'dblib:host=10.200.0.84;dbname=imis', 
         $user, 
         $password
     );
 
     $q = "select * from imis.dbo.vfindyourdo where id = $id";
-    //$stmt = $db->query($q);
     $stmt = $db->prepare($q);
     $stmt->execute();
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
      
-    $current = App\Physician::where('aoa_mem_id', '=', (int) $row['id'])->first();
+    //$current = App\Physician::where('aoa_mem_id', '=', (int) $row['id'])->first();
+    dd($row);
 });
