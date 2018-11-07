@@ -9,5 +9,6 @@ class Specialty extends Model
     protected $guarded = [];
     public $timestamps = null;
     protected $primaryKey = 'code';
+    public $incrementing = false;
 }
 
