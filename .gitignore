@@ -7,3 +7,4 @@ Homestead.json
 /misc
 *.swo
 *.swp
+.DS_Store

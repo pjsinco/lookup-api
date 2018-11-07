@@ -14,12 +14,12 @@ php artisan physicians:refresh
 6. Physicians
 
 ```
-php artisan db:seed --class=LocationTableSeeder
-php artisan db:seed --class=SpecialtyTableSeeder
-php artisan db:seed --class=SpecialtySubspecialtyTableSeeder
-php artisan db:seed --class=AliasTableSeeder
-php artisan db:seed --class=CreateSpecialtyAliasTableSeeder
-php artisan db:seed --class=PhysicianTableSeeder
+php artisan db:seed --class=LocationTableSeeder   
+php artisan db:seed --class=SpecialtyTableSeeder  
+php artisan db:seed --class=SpecialtySubspecialtyTableSeeder  
+php artisan db:seed --class=AliasTableSeeder  
+php artisan db:seed --class=CreateSpecialtyAliasTableSeeder  
+php artisan db:seed --class=PhysicianTableSeeder  
 ```
 
 ###When things don't work as expected
