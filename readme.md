@@ -34,3 +34,14 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_rsa 
 ```
 
+###Example of importing into physicians table after exporting from prod
+```
+LOAD DATA LOCAL INFILE
+  '/home/vagrant/Sites/lookup-api/database/seeds/data/physicians-2018-11-07-for-import.csv'
+  INTO TABLE physicians
+  FIELDS 
+    TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+  LINES 
+    TERMINATED BY '\n'
+```
