@@ -47,10 +47,11 @@ dd($results);
 Route::get('test/mssql/{id}', function($id) {
     $user = env('MSSQL_USERNAME');
     $password = env('MSSQL_PASSWORD');
+    $host = env('MSSQL_HOST');
+    $db = env('MSSQL_IMIS');
 
     $db = new PDO(
-        //'dblib:host=sql05-1.aoanet.local;dbname=imis', 
-        'dblib:host=10.200.0.84;dbname=imis', 
+        "dblib:host=$host;dbname=$db", 
         $user, 
         $password
     );
