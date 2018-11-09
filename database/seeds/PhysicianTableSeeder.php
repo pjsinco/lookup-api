@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Elit\AggregateReporter;
+use Elit\Hasher;
 
 class PhysicianTableSeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class PhysicianTableSeeder extends Seeder
     {
         DB::table('physicians')->truncate();
 
-        $physicians = $this->getCsv('physicians-2017-05-11.csv');
+        $physicians = $this->getCsv('physicians-2018-11-07.csv');
         $this->seedTable($physicians);
     }
 
@@ -31,6 +32,7 @@ class PhysicianTableSeeder extends Seeder
             $aliases = AggregateReporter::getAliases([$row[17], $row[19]]);
 
             DB::table('physicians')->insert([
+                'id'                         => Hasher::createId($row[0], $row[1]),
                 'aoa_mem_id'                 => $row[0],
                 'full_name'                  => $row[1],
                 'prefix'                     => $row[2],

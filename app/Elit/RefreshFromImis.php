@@ -9,6 +9,7 @@ use Schema;
 use Stanley\Geocodio\Client;
 use Monolog\Logger;
 use Elit\AggregateReporter;
+use Elit\Hasher;
 
 /**
  * Update Find Your DO data with data from iMis.
@@ -215,7 +216,7 @@ class RefreshFromImis
 
     Schema::create($backupTableName, function (Blueprint $table) {
       $table->timestamps();
-      $table->increments('id');
+      $table->string('id')->unique();
       $table->string('aoa_mem_id', 16);
       $table->string('full_name');
       $table->string('prefix', 24)->nullable();
@@ -393,7 +394,10 @@ class RefreshFromImis
       $row->SecondaryPracticeFocusCode
     ]);
 
+    $id = Hasher::createId($row->id, $row->full_name);
+
     $physician = \App\Physician::create([
+      'id'                 => $id,
       'aoa_mem_id'         => trim($row->id),
       'full_name'          => trim($row->full_name),
       'prefix'           => trim($row->prefix),
