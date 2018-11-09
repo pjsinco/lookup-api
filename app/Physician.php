@@ -10,57 +10,9 @@ use Elit\DoctorHandler;
 
 class Physician extends Model
 {
-  //public $timestamps = false;
-  //protected $primaryKey = 'aoa_mem_id';
-
-  protected $fillable = [
-    'aoa_mem_id',
-    'full_name',
-    'prefix',
-    'first_name',
-    'middle_name',
-    'last_name',
-    'suffix',
-    'designation',
-    'SortColumn',
-    'MemberStatus',
-    'City',
-    'State_Province',
-    'Zip',
-    'Country',
-    'COLLEGE_CODE',
-    'YearOfGraduation',
-    'fellows',
-    'PrimaryPracticeFocusCode',
-    'PrimaryPracticeFocusArea',
-    'SecondaryPracticeFocusCode',
-    'SecondaryPracticeFocusArea',
-    'website',
-    'AOABoardCertified',
-    'address_1',
-    'address_2',
-    'Phone',
-    'Email',
-    'ABMS',
-    'Gender',
-    'CERT1',
-    'CERT2',
-    'CERT3',
-    'CERT4',
-    'CERT5',
-    'lat',
-    'lon',
-    'geo_confidence',
-    'geo_city',
-    'geo_state',
-    'geo_matches',
-    'alias_1',
-    'alias_2',
-    'alias_3',
-    'alias_4',
-    'alias_5',
-    'alias_6',
-  ];
+  protected $primaryKey = 'id';
+  public $incrementing = false;
+  protected $guarded = [];
 
   public $hidden = [
     'id',
