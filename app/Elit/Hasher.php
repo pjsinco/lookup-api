@@ -16,10 +16,13 @@ class Hasher
    * @return string Format: <firstName>-<lastName>-DO-<hash>
    *
    */
-  public static function createId($idBase, $fullName) {
-    if (empty($idBase) || empty($fullName)) {
+  public static function createId($id, $fullName) {
+    if (empty($id) || empty($fullName)) {
       return '';
     }
+
+    $id = str_pad($id, 6, '0', STR_PAD_LEFT);
+    $idBase64 = base64_encode($id);
 
     $punctStripped = 
       preg_replace('/[.,\/#!$%\^&\*;:{}=\-_`~()]/', '', $fullName);
@@ -27,7 +30,7 @@ class Hasher
     return sprintf(
       '%s-%s',
       mb_strtolower(str_replace(' ', '-', $punctStripped)),
-      mb_substr(hash('sha256', $idBase), 0, 18)
+      mb_substr(hash('sha256', $idBase64), 0, 18)
     );
   }
 }
