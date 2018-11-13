@@ -32,7 +32,7 @@ class PhysicianTableSeeder extends Seeder
             $aliases = AggregateReporter::getAliases([$row[17], $row[19]]);
 
             DB::table('physicians')->insert([
-                'id'                         => Hasher::createId($row[0], $row[1]),
+                'id'                         => Hasher::createId($row[0], $row[3], $row[4], $row[5]),
                 'aoa_mem_id'                 => $row[0],
                 'full_name'                  => $row[1],
                 'prefix'                     => $row[2],

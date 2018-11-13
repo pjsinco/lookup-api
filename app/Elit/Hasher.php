@@ -11,18 +11,21 @@ class Hasher
    * Create an identifier for a physician.
    *
    * @param string $idBase The base for creating the hash
-   * @param string fullName Full name
+   * @param string firstName First name
+   * @param string middleName Middle name
+   * @param string lastName Last name
    *
    * @return string Format: <firstName>-<lastName>-DO-<hash>
    *
    */
-  public static function createId($id, $fullName) {
-    if (empty($id) || empty($fullName)) {
-      return '';
-    }
+  public static function createId($id, $firstName, $middleName, $lastName, $designation = 'DO') {
+    $fullName = sprintf('%s %s %s %s', $firstName, $middleName, $lastName, $designation);
+
+    if (empty($id)) { return ''; }
 
     $id = str_pad($id, 6, '0', STR_PAD_LEFT);
     $idBase64 = base64_encode($id);
+
 
     $punctStripped = 
       preg_replace('/[.,\/#!$%\^&\*;:{}=\-_`~()]/', '', $fullName);

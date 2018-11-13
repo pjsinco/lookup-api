@@ -12,7 +12,7 @@ class TestHasher extends PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->hash = Hasher::createId('157524', 'Patrick Sinco');
+    $this->hash = Hasher::createId('157524', 'Sam', 'Xavier', 'Seaborn');
   }
 
   public function testReturnsAString()
@@ -22,9 +22,9 @@ class TestHasher extends PHPUnit_Framework_TestCase
 
   public function testReturnsSameValueOnMultipleCalls()
   {
-    $hash1 = Hasher::createId('157524', 'Patrick Sinco');
-    $hash2 = Hasher::createId('157524', 'Patrick Sinco');
-    $hash3 = Hasher::createId('157524', 'Patrick Sinco');
+    $hash1 = Hasher::createId('157524', 'Sam', 'Xavier', 'Seaborn');
+    $hash2 = Hasher::createId('157524', 'Sam', 'Xavier', 'Seaborn');
+    $hash3 = Hasher::createId('157524', 'Sam', 'Xavier', 'Seaborn');
 
     $this->assertTrue($hash1 == $hash2);
     $this->assertTrue($hash1 == $hash3);
@@ -33,12 +33,12 @@ class TestHasher extends PHPUnit_Framework_TestCase
 
   public function testZeroPadding()
   {
-    $hash1 = Hasher::createId('1', 'Patrick Sinco');
-    $hash2 = Hasher::createId('01', 'Patrick Sinco');
-    $hash3 = Hasher::createId('001', 'Patrick Sinco');
-    $hash4 = Hasher::createId('0001', 'Patrick Sinco');
-    $hash5 = Hasher::createId('00001', 'Patrick Sinco');
-    $hash6 = Hasher::createId('000001', 'Patrick Sinco');
+    $hash1 = Hasher::createId('1', 'Sam', 'Xavier', 'Seaborn');
+    $hash2 = Hasher::createId('01', 'Sam', 'Xavier', 'Seaborn');
+    $hash3 = Hasher::createId('001', 'Sam', 'Xavier', 'Seaborn');
+    $hash4 = Hasher::createId('0001', 'Sam', 'Xavier', 'Seaborn');
+    $hash5 = Hasher::createId('00001', 'Sam', 'Xavier', 'Seaborn');
+    $hash6 = Hasher::createId('000001', 'Sam', 'Xavier', 'Seaborn');
 
     $this->assertTrue(
       ($hash1 == $hash6) &&
