@@ -1,7 +1,7 @@
 <?php
 
 Route::get('/', function() {
-  echo '...';
+  echo '<html><head><link rel="stylesheet" type="text/css" /></head></html>';
 });
 
 Route::group(['prefix' => 'api/v1'], function() {
