@@ -180,3 +180,6 @@ csvcut -c aoa_mem_id,full_name,prefix,first_name,middle_name,last_name,suffix,de
 
 ###### Mon Dec 18 11:56:36 2017 CST
 * [The Comprehensive Guide to URL Parameter Encryption in PHP - Paragon Initiative Enterprises Blog](https://paragonie.com/blog/2015/09/comprehensive-guide-url-parameter-encryption-in-php)
+
+###### Wed Apr 17 15:55:31 2019 CDT 
+* [JonasCz/How-To-Prevent-Scraping: The ultimate guide on preventing Website Scraping](https://github.com/JonasCz/How-To-Prevent-Scraping)
